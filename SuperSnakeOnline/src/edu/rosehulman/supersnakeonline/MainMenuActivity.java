@@ -32,7 +32,7 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.one_player_button:
-			Intent onePlayerIntent = new Intent(this, SnakeGameActivity.class);
+			Intent onePlayerIntent = new Intent(this, Snake.class);
 			//onPlayerIntent.putExtra(KEY_NUM_BUTTONS, mNumButtons);
 			startActivity(onePlayerIntent);
 			break;

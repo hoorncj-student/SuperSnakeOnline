@@ -3,13 +3,18 @@ package edu.rosehulman.supersnakeonline;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.Menu;
+import android.widget.ListView;
 
 public class HighScoresActivity extends Activity {
+	
+	private ListView mScoresList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_high_scores);
+		
+		mScoresList = (ListView)findViewById(R.id.high_scores_list);
 	}
 
 	@Override

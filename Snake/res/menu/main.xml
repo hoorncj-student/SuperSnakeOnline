@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/resume_button" 
+        android:title="@string/resume_button" 
+        android:icon="@drawable/ic_menu_rotate" 
+        android:showAsAction="never"></item>
+    <item android:id="@+id/left_arrow_button" 
+        android:showAsAction="always" 
+        android:icon="@drawable/ic_left_arrow"></item>
+    <item android:id="@+id/right_arrow_button" 
+        android:showAsAction="always" 
+        android:icon="@drawable/ic_right_arrow"></item>
+    <item android:id="@+id/change_speed_button" 
+        android:title="@string/change_speed_button" 
+        android:icon="@drawable/ic_menu_more">
+        <menu>
+            <group android:id="@+id/speeds" 
+                android:checkableBehavior="single">
+                <item android:id="@+id/slow_button" 
+                    android:title="@string/slow_button" 
+                    android:checked="true"/>
+                <item android:id="@+id/medium_button" 
+                    android:title="@string/medium_button" 
+                    android:checked="false"/>
+                <item android:id="@+id/fast_button" 
+                    android:title="@string/fast_button" 
+                    android:checked="false"/>
+            </group>
+        </menu>
+    </item>
+    <item android:id="@+id/settings_button" 
+        android:title="@string/settings_button"></item>
+
+</menu>

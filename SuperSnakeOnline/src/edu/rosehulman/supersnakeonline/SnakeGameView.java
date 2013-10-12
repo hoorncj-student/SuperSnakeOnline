@@ -22,6 +22,13 @@ public class SnakeGameView extends TileView {
     public static final int WEST = 4;
     
     /**
+     * Labels for the drawables that will be loaded into the TileView class
+     */
+    private static final int RED_STAR = 1;
+    private static final int YELLOW_STAR = 2;
+    private static final int GREEN_STAR = 3;
+    
+    /**
      * mScore: Used to track the number of apples captured mMoveDelay: number of milliseconds
      * between snake movements. This will decrease as apples are captured.
      */
@@ -246,6 +253,14 @@ public class SnakeGameView extends TileView {
      * Draws some walls.
      */
     private void updateWalls() {
+    	for (int x = 0; x < mXTileCount; x++) {
+            setTile(GREEN_STAR, x, 0);
+            setTile(GREEN_STAR, x, mYTileCount - 1);
+        }
+        for (int y = 1; y < mYTileCount - 1; y++) {
+            setTile(GREEN_STAR, 0, y);
+            setTile(GREEN_STAR, mXTileCount - 1, y);
+        }
     }
     
     /**

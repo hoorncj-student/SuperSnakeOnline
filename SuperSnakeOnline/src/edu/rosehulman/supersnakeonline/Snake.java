@@ -64,6 +64,8 @@ public class Snake extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_snake_game);
+        
+        Log.d(ICICLE_KEY,"started game");
 
         mGestureDetector = new GestureDetector(this, new MyGestureDetector());
         
