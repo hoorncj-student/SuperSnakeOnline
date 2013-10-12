@@ -19,5 +19,9 @@
     <string name="game_sound">Sound</string>
     <string name="title_activity_online_lobby">OnlineLobbyActivity</string>
     <string name="hello_world">Hello world!</string>
+    <string name="name_prompt">Online Name</string>
+    <string name="settings_title">Settings</string>
+    <string name="high_scores_title">High Scores</string>
+    <string name="online_lobby_title">Online Lobby</string>
 
 </resources>
