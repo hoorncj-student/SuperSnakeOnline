@@ -9,6 +9,16 @@ package edu.rosehulman.supersnakeonline;
 
 public final class R {
     public static final class attr {
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int tileSize=0x7f010000;
     }
     public static final class color {
         public static final int greenstuff=0x7f040000;
@@ -41,10 +51,10 @@ public final class R {
         public static final int radio2=0x7f09000d;
         public static final int radioGroup1=0x7f09000a;
         public static final int settings_button=0x7f090006;
+        public static final int snake=0x7f09000e;
         public static final int snake_color_text=0x7f090007;
         public static final int title=0x7f090002;
         public static final int two_player_button=0x7f090004;
-        public static final int view1=0x7f09000e;
     }
     public static final class layout {
         public static final int activity_high_scores=0x7f030000;
@@ -108,4 +118,35 @@ public final class R {
          */
         public static final int AppTheme=0x7f070001;
     }
+    public static final class styleable {
+        /** Attributes that can be used with a TileView.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #TileView_tileSize edu.rosehulman.supersnakeonline:tileSize}</code></td><td></td></tr>
+           </table>
+           @see #TileView_tileSize
+         */
+        public static final int[] TileView = {
+            0x7f010000
+        };
+        /**
+          <p>This symbol is the offset where the {@link edu.rosehulman.supersnakeonline.R.attr#tileSize}
+          attribute's value can be found in the {@link #TileView} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name edu.rosehulman.supersnakeonline:tileSize
+        */
+        public static final int TileView_tileSize = 0;
+    };
 }
