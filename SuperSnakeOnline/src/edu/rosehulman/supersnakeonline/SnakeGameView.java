@@ -8,8 +8,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.view.View;
 
 public class SnakeGameView extends TileView {
+	
+    /**
+     * Current mode of application: READY to run, RUNNING, or you have already lost. static final
+     * ints are used instead of an enum for performance reasons.
+     */
+    private int mMode = READY;
+    public static final int PAUSE = 0;
+    public static final int READY = 1;
+    public static final int RUNNING = 2;
+    public static final int LOSE = 3;
 	
     /**
      * Current direction the snake is headed.
@@ -66,6 +77,10 @@ public class SnakeGameView extends TileView {
             sendMessageDelayed(obtainMessage(0), delayMillis);
         }
     };
+    
+    public int getMode() {
+    	return this.mMode;
+    }
 
     public int getDirection() {
     	return this.mDirection;
@@ -95,6 +110,9 @@ public class SnakeGameView extends TileView {
         Resources r = this.getContext().getResources();
 
         resetTiles(4);
+        loadTile(RED_STAR, r.getDrawable(R.drawable.redstar)); 
+        loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
+        loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
     }
  
     public void initNewGame() {
@@ -192,17 +210,25 @@ public class SnakeGameView extends TileView {
     public void moveSnake(int direction) {
 
         if (direction == Snake.MOVE_UP) {
-        	if (mScore == 0) {
+            if (mMode == READY | mMode == LOSE) {
                 /*
                  * At the beginning of the game, or the end of a previous one,
                  * we should start a new game if UP key is clicked.
                  */
                 initNewGame();
+                setMode(RUNNING);
                 update();
-                mScore++;
                 return;
-        	}
+            }
 
+            if (mMode == PAUSE) {
+                /*
+                 * If the game is merely paused, we should just continue where we left off.
+                 */
+                setMode(RUNNING);
+                update();
+                return;
+            }
 
             if (mDirection != SOUTH) {
                 mNextDirection = NORTH;
@@ -231,6 +257,56 @@ public class SnakeGameView extends TileView {
             return;
         }
 
+    }
+    
+    /**
+     * Updates the current mode of the application (RUNNING or PAUSED or the like) as well as sets
+     * the visibility of textview for notification
+     * 
+     * @param newMode
+     */
+    public void setMode(int newMode) {
+        int oldMode = mMode;
+        mMode = newMode;
+
+        if (newMode == RUNNING && oldMode != RUNNING) {
+            // hide the game instructions
+            //mStatusText.setVisibility(View.INVISIBLE);
+            update();
+            // make the background and arrows visible as soon the snake starts moving
+           // mArrowsView.setVisibility(View.VISIBLE);
+           // mBackgroundView.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        Resources res = getContext().getResources();
+        CharSequence str = "";
+        if (newMode == PAUSE) {
+           // mArrowsView.setVisibility(View.GONE);
+           // mBackgroundView.setVisibility(View.GONE);
+           // str = res.getText(R.string.mode_pause);
+        }
+        if (newMode == READY) {
+           // mArrowsView.setVisibility(View.GONE);
+           // mBackgroundView.setVisibility(View.GONE);
+
+          //  str = res.getText(R.string.mode_ready);
+        }
+        if (newMode == LOSE) {
+          //  mArrowsView.setVisibility(View.GONE);
+          //  mBackgroundView.setVisibility(View.GONE);
+          //  str = res.getString(R.string.mode_lose, mScore);
+        }
+
+        //mStatusText.setText(str);
+        //mStatusText.setVisibility(View.VISIBLE);
+    }
+    
+    /**
+     * @return the Game state as Running, Ready, Paused, Lose
+     */
+    public int getGameState() {
+        return mMode;
     }
     
     /**
@@ -300,7 +376,7 @@ public class SnakeGameView extends TileView {
         // For now we have a 1-square wall around the entire arena
         if ((newHead.x < 1) || (newHead.y < 1) || (newHead.x > mXTileCount - 2)
                 || (newHead.y > mYTileCount - 2)) {
-            //setMode(LOSE);
+            setMode(LOSE);
             return;
 
         }
@@ -310,10 +386,26 @@ public class SnakeGameView extends TileView {
         for (int snakeindex = 0; snakeindex < snakelength; snakeindex++) {
             Coordinate c = mSnakeTrail.get(snakeindex);
             if (c.equals(newHead)) {
-               // setMode(LOSE);
+                setMode(LOSE);
                 return;
             }
         }
+
+        /*
+        // Look for apples
+        int applecount = mAppleList.size();
+        for (int appleindex = 0; appleindex < applecount; appleindex++) {
+            Coordinate c = mAppleList.get(appleindex);
+            if (c.equals(newHead)) {
+                mAppleList.remove(c);
+                addRandomApple();
+
+                mScore++;
+                mMoveDelay *= 0.9;
+
+                growSnake = true;
+            }
+        }*/
 
         // push a new head onto the ArrayList and pull off the tail
         mSnakeTrail.add(0, newHead);
@@ -325,9 +417,9 @@ public class SnakeGameView extends TileView {
         int index = 0;
         for (Coordinate c : mSnakeTrail) {
             if (index == 0) {
-                //setTile(YELLOW_STAR, c.x, c.y);
+                setTile(YELLOW_STAR, c.x, c.y);
             } else {
-                //setTile(RED_STAR, c.x, c.y);
+                setTile(RED_STAR, c.x, c.y);
             }
             index++;
         }

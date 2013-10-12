@@ -73,22 +73,26 @@ public class Snake extends Activity {
 
         if (savedInstanceState == null) {
             // We were just launched -- set up a new game
-            //mSnakeView.setMode(SnakeGameView.READY);
+            mSnakeView.setMode(SnakeGameView.READY);
         } else {
             // We are being restored
             Bundle map = savedInstanceState.getBundle(ICICLE_KEY);
             if (map != null) {
                 mSnakeView.restoreState(map);
             } else {
-                //mSnakeView.setMode(SnakeGameView.PAUSE);
+                mSnakeView.setMode(SnakeGameView.PAUSE);
             }
         }
         mSnakeView.setOnTouchListener(new OnTouchListener() {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+            	if (mSnakeView.getGameState() == SnakeGameView.RUNNING && mGestureDetector.onTouchEvent(event)) {
+            		return true;
+            	} 
             	
-                if (mSnakeView.getScore() > 0) {
+            	
+                if (mSnakeView.getGameState() == SnakeGameView.RUNNING) {
                     // Normalize x,y between 0 and 1
                     float x = event.getX() / v.getWidth();
                     float y = event.getY() / v.getHeight();
@@ -101,7 +105,7 @@ public class Snake extends Activity {
                     // Direction is same as the quadrant which was clicked
                     mSnakeView.moveSnake(direction);
 
-                } else if (mSnakeView.getScore() == 0) {
+                } else if (mSnakeView.getGameState() != SnakeGameView.RUNNING) {
                     // If the game is not running then on touching any part of the screen
                     // we start the game by sending MOVE_UP signal to SnakeGameView
                     mSnakeView.moveSnake(MOVE_UP);
@@ -115,7 +119,7 @@ public class Snake extends Activity {
     protected void onPause() {
         super.onPause();
         // Pause the game along with the activity
-        //mSnakeView.setMode(SnakeGameView.PAUSE);
+        mSnakeView.setMode(SnakeGameView.PAUSE);
     }
 
     @Override
