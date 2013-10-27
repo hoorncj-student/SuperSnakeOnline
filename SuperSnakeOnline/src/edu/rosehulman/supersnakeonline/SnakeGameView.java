@@ -130,8 +130,6 @@ public class SnakeGameView extends TileView {
         loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
         loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
         loadTile(POINT_STAR, r.getDrawable(R.drawable.yellowstar1));
-        
-        mMoveDelay *= 0.9;
     }
  
     public void initNewGame() {
@@ -520,11 +518,14 @@ public class SnakeGameView extends TileView {
         			growSnake = true;
         			break;
         		case(1): // apples
+					mMoveDelay *= 0.9;
         			addRandomApples();
         			growSnake = true;
         			break;
         		case(2): // shrink
+					mMoveDelay *= 0.9;
         			shrinkSnake();
+					mScore++;
         			break;
         		}
         	}
@@ -534,6 +535,7 @@ public class SnakeGameView extends TileView {
         for (int appleindex = 0; appleindex < applecount; appleindex++) {
             Coordinate c = mAppleList.get(appleindex);
             if (c.equals(newHead)) {
+				mMoveDelay *= 0.9;
                 mAppleList.remove(c);
                 mScore++;
                 growSnake = true;
