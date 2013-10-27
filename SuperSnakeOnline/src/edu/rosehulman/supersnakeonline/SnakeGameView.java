@@ -535,7 +535,6 @@ public class SnakeGameView extends TileView {
         for (int appleindex = 0; appleindex < applecount; appleindex++) {
             Coordinate c = mAppleList.get(appleindex);
             if (c.equals(newHead)) {
-				mMoveDelay *= 0.9;
                 mAppleList.remove(c);
                 mScore++;
                 growSnake = true;
