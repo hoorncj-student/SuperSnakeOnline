@@ -24,7 +24,7 @@ public class SnakeGameView extends TileView {
     public static final int RUNNING = 2;
     public static final int LOSE = 3;
     
-    private long mPowerupDelay = 300;
+    private long mPowerupDelay = 10000;
 	
     /**
      * Current direction the snake is headed.
@@ -55,6 +55,7 @@ public class SnakeGameView extends TileView {
      * move should be made based on mMoveDelay.
      */
     private long mLastMove;
+    private long mLastPowerTime;
     
     /**
      * mSnakeTrail: A list of Coordinates that make up the snake's body.
@@ -125,7 +126,7 @@ public class SnakeGameView extends TileView {
 
         Resources r = this.getContext().getResources();
 
-        resetTiles(4);
+        resetTiles(5);
         loadTile(RED_STAR, r.getDrawable(R.drawable.redstar)); 
         loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
         loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
@@ -134,6 +135,9 @@ public class SnakeGameView extends TileView {
  
     public void initNewGame() {
         mSnakeTrail.clear();
+        mAppleList.clear();
+        mPowerupList.clear();
+        
 
         mSnakeTrail.add(new Coordinate(7, 5));
         mSnakeTrail.add(new Coordinate(6, 5));
@@ -144,6 +148,7 @@ public class SnakeGameView extends TileView {
         mNextDirection = NORTH;
 
         mScore = 0;
+        addRandomApple();
     }
     
     /**
@@ -370,8 +375,9 @@ public class SnakeGameView extends TileView {
 	            updateApples();
 	            mLastMove = now;
 	        }
-	        if (now - mLastMove > mPowerupDelay) {
+	        if (now - mLastPowerTime > mPowerupDelay) {
 	        	addRandomPowerup();
+	        	mLastPowerTime = now;
 	        }
 	        mRedrawHandler.sleep(mMoveDelay);
     	}
@@ -415,7 +421,7 @@ public class SnakeGameView extends TileView {
      */
     private void updateApples() {
         for (Coordinate c : mAppleList) {
-            setTile(YELLOW_STAR, c.x, c.y);
+            setTile(POINT_STAR, c.x, c.y);
         }
     }
 
@@ -513,7 +519,7 @@ public class SnakeGameView extends TileView {
         		mPowerupList.remove(p);
         		switch(t.ordinal()) {
         		case(0): // slower
-        			mMoveDelay *= 1.2;
+        			mMoveDelay *= 2;
         			mScore++;
         			growSnake = true;
         			break;
@@ -528,6 +534,7 @@ public class SnakeGameView extends TileView {
 					mScore++;
         			break;
         		}
+        		break;
         	}
         }
         
@@ -538,6 +545,7 @@ public class SnakeGameView extends TileView {
                 mAppleList.remove(c);
                 mScore++;
                 growSnake = true;
+                addRandomApple();
             }
         }
 
@@ -576,6 +584,7 @@ public class SnakeGameView extends TileView {
         boolean found = false;
         while (!found) {
             // Choose a new location for our apple
+        	int thing = mXTileCount;
             int newX = 1 + RNG.nextInt(mXTileCount - 2);
             int newY = 1 + RNG.nextInt(mYTileCount - 2);
             newCoord = new Coordinate(newX, newY);
