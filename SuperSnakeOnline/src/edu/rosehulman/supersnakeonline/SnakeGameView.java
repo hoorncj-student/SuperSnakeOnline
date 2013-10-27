@@ -1,6 +1,7 @@
 package edu.rosehulman.supersnakeonline;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -8,10 +9,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 public class SnakeGameView extends TileView {
-	
+	private static final String TAG = "SnakeGameView";
     /**
      * Current mode of application: READY to run, RUNNING, or you have already lost. static final
      * ints are used instead of an enum for performance reasons.
@@ -21,6 +23,8 @@ public class SnakeGameView extends TileView {
     public static final int READY = 1;
     public static final int RUNNING = 2;
     public static final int LOSE = 3;
+    
+    private long mPowerupDelay = 300;
 	
     /**
      * Current direction the snake is headed.
@@ -38,6 +42,7 @@ public class SnakeGameView extends TileView {
     private static final int RED_STAR = 1;
     private static final int YELLOW_STAR = 2;
     private static final int GREEN_STAR = 3;
+    private static final int POINT_STAR = 4;
     
     /**
      * mScore: Used to track the number of apples captured mMoveDelay: number of milliseconds
@@ -52,9 +57,19 @@ public class SnakeGameView extends TileView {
     private long mLastMove;
     
     /**
-     * mSnakeTrail: A list of Coordinates that make up the snake's body mAppleList.
+     * mSnakeTrail: A list of Coordinates that make up the snake's body.
      */
     private ArrayList<Coordinate> mSnakeTrail = new ArrayList<Coordinate>();
+    
+    /**
+     * mPowerupList
+     */
+    private ArrayList<Powerup> mPowerupList = new ArrayList<Powerup>();
+    
+    /**
+     * mAppleList
+     */
+    private ArrayList<Coordinate> mAppleList = new ArrayList<Coordinate>(); 
     
     /**
      * Create a simple handler that we can use to cause animation to happen. We set ourselves as a
@@ -63,6 +78,7 @@ public class SnakeGameView extends TileView {
      */
 
     private RefreshHandler mRedrawHandler = new RefreshHandler();
+    private static final Random RNG = new Random();
     
     class RefreshHandler extends Handler {
 
@@ -113,20 +129,20 @@ public class SnakeGameView extends TileView {
         loadTile(RED_STAR, r.getDrawable(R.drawable.redstar)); 
         loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
         loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
+        loadTile(POINT_STAR, r.getDrawable(R.drawable.yellowstar1));
+        
+        mMoveDelay *= 0.9;
     }
  
     public void initNewGame() {
         mSnakeTrail.clear();
 
-        // For now we're just going to load up a short default eastbound snake
-        // that's just turned north
-
-        mSnakeTrail.add(new Coordinate(7, 7));
-        mSnakeTrail.add(new Coordinate(6, 7));
-        mSnakeTrail.add(new Coordinate(5, 7));
-        mSnakeTrail.add(new Coordinate(4, 7));
-        mSnakeTrail.add(new Coordinate(3, 7));
-        mSnakeTrail.add(new Coordinate(2, 7));
+        mSnakeTrail.add(new Coordinate(7, 5));
+        mSnakeTrail.add(new Coordinate(6, 5));
+        mSnakeTrail.add(new Coordinate(5, 5));
+        mSnakeTrail.add(new Coordinate(4, 5));
+        mSnakeTrail.add(new Coordinate(3, 5));
+        mSnakeTrail.add(new Coordinate(2, 5));
         mNextDirection = NORTH;
 
         mScore = 0;
@@ -160,17 +176,31 @@ public class SnakeGameView extends TileView {
      */
     public Bundle saveState() {
         Bundle map = new Bundle();
-
+        map.putIntArray("mAppleList", coordArrayListToArray(mAppleList));
         map.putInt("mDirection", Integer.valueOf(mDirection));
         map.putInt("mNextDirection", Integer.valueOf(mNextDirection));
         map.putLong("mMoveDelay", Long.valueOf(mMoveDelay));
         map.putLong("mScore", Long.valueOf(mScore));
         map.putIntArray("mSnakeTrail", coordArrayListToArray(mSnakeTrail));
+        map.putIntArray("mPowerupList", coordArrayListToArray(mPowerupList, 0));
 
         return map;
     }
     
-    /**
+    private int[] coordArrayListToArray(ArrayList<Powerup> cvec, int k) {
+        int[] rawArray = new int[cvec.size() * 3];
+
+        for (int i=0; i<cvec.size(); i++) {
+        	Coordinate c = cvec.get(i).getCoord();
+        	PowerupType t = cvec.get(i).getPowerup();
+            rawArray[i++] = c.x;
+            rawArray[i++] = c.y;
+            rawArray[i++] = t.ordinal();
+        }
+        return rawArray;
+	}
+
+	/**
      * Given a flattened array of ordinate pairs, we re-constitute them into a ArrayList of
      * Coordinate objects
      * 
@@ -194,11 +224,28 @@ public class SnakeGameView extends TileView {
      * @param icicle a Bundle containing the game state
      */
     public void restoreState(Bundle icicle) {
+    	mAppleList = coordArrayToArrayList(icicle.getIntArray("mAppleList"));
         mDirection = icicle.getInt("mDirection");
         mNextDirection = icicle.getInt("mNextDirection");
         mMoveDelay = icicle.getLong("mMoveDelay");
         mScore = icicle.getLong("mScore");
         mSnakeTrail = coordArrayToArrayList(icicle.getIntArray("mSnakeTrail"));
+        mPowerupList = coordArrayToArrayList(icicle.getIntArray("mPowerupList"), 0);
+    }
+    
+    private ArrayList<Powerup> coordArrayToArrayList(int[] rawArray, int k) {
+        ArrayList<Powerup> powerArrayList = new ArrayList<Powerup>();
+        Powerup p = new Powerup();
+
+        int coordCount = rawArray.length;
+        for (int index = 0; index < coordCount; index += 3) {
+            Coordinate c = new Coordinate(rawArray[index], rawArray[index + 1]);
+            p.setCoord(c);
+            p.setPowerup(PowerupType.values()[rawArray[index+2]]);
+            powerArrayList.add(p);
+            
+        }
+        return powerArrayList;
     }
     
     /**
@@ -295,7 +342,7 @@ public class SnakeGameView extends TileView {
         if (newMode == LOSE) {
           //  mArrowsView.setVisibility(View.GONE);
           //  mBackgroundView.setVisibility(View.GONE);
-          //  str = res.getString(R.string.mode_lose, mScore);
+          //str = res.getString(R.string.mode_lose, mScore);
         }
 
         //mStatusText.setText(str);
@@ -314,18 +361,85 @@ public class SnakeGameView extends TileView {
      * a move should be made, updating the snake's location.
      */
     public void update() {
-        long now = System.currentTimeMillis();
-
-        if (now - mLastMove > mMoveDelay) {
-            clearTiles();
-            updateWalls();
-            updateSnake();
-            mLastMove = now;
-        }
-        mRedrawHandler.sleep(mMoveDelay);
+    	if (mMode == RUNNING) {
+	        long now = System.currentTimeMillis();
+	
+	        if (now - mLastMove > mMoveDelay) {
+	            clearTiles();
+	            updateWalls();
+	            updateSnake();
+	            updatePowerups();
+	            updateApples();
+	            mLastMove = now;
+	        }
+	        if (now - mLastMove > mPowerupDelay) {
+	        	addRandomPowerup();
+	        }
+	        mRedrawHandler.sleep(mMoveDelay);
+    	}
     }
     
-    /**
+    private void addRandomPowerup() {
+    	Powerup newPower = new Powerup();
+    	Coordinate newCoord = null;
+        boolean found = false;
+        while (!found) {
+            // Choose a new location for our apple
+            int newX = 1 + RNG.nextInt(mXTileCount - 2);
+            int newY = 1 + RNG.nextInt(mYTileCount - 2);
+            newCoord = new Coordinate(newX, newY);
+
+            // Make sure it's not already under the snake
+            boolean collision = false;
+            int snakelength = mSnakeTrail.size();
+            for (int index = 0; index < snakelength; index++) {
+                if (mSnakeTrail.get(index).equals(newCoord)) {
+                    collision = true;
+                }
+            }
+            // if we're here and there's been no collision, then we have
+            // a good location for an apple. Otherwise, we'll circle back
+            // and try again
+            found = !collision;
+            
+            newPower.setCoord(newCoord);
+        }
+        newPower.setPowerup(PowerupType.values()[RNG.nextInt(3)]);
+        
+        if (newCoord == null) {
+            Log.e(TAG, "Somehow ended up with a null newCoord!");
+        }
+        mPowerupList.add(newPower);
+	}
+
+	/**
+     * Draws some apples.
+     */
+    private void updateApples() {
+        for (Coordinate c : mAppleList) {
+            setTile(YELLOW_STAR, c.x, c.y);
+        }
+    }
+
+
+	private void updatePowerups() {
+		for (Powerup p : mPowerupList) {
+			Coordinate c = p.getCoord();
+			switch(p.getPowerup().ordinal()) {
+			case(0): // slower red
+				setTile(RED_STAR, c.x, c.y);
+				break;
+			case(1): // apples yellow
+				setTile(YELLOW_STAR, c.x, c.y);
+				break;
+			case(2): // shrink green
+				setTile(GREEN_STAR, c.x, c.y);
+				break;
+			}
+		}
+	}
+
+	/**
      * Draws some walls.
      */
     private void updateWalls() {
@@ -391,21 +505,40 @@ public class SnakeGameView extends TileView {
             }
         }
 
-        /*
-        // Look for apples
+        // Look for powerups
+        int powerCount = mPowerupList.size();
+        for (int i=0; i<powerCount; i++) {
+        	Powerup p = mPowerupList.get(i);
+        	Coordinate c = p.getCoord();
+        	PowerupType t = p.getPowerup();
+        	if (c.equals(newHead)) {
+        		mPowerupList.remove(p);
+        		switch(t.ordinal()) {
+        		case(0): // slower
+        			mMoveDelay *= 1.2;
+        			mScore++;
+        			growSnake = true;
+        			break;
+        		case(1): // apples
+        			addRandomApples();
+        			growSnake = true;
+        			break;
+        		case(2): // shrink
+        			shrinkSnake();
+        			break;
+        		}
+        	}
+        }
+        
         int applecount = mAppleList.size();
         for (int appleindex = 0; appleindex < applecount; appleindex++) {
             Coordinate c = mAppleList.get(appleindex);
             if (c.equals(newHead)) {
                 mAppleList.remove(c);
-                addRandomApple();
-
                 mScore++;
-                mMoveDelay *= 0.9;
-
                 growSnake = true;
             }
-        }*/
+        }
 
         // push a new head onto the ArrayList and pull off the tail
         mSnakeTrail.add(0, newHead);
@@ -414,6 +547,8 @@ public class SnakeGameView extends TileView {
             mSnakeTrail.remove(mSnakeTrail.size() - 1);
         }
 
+        
+        // snake color
         int index = 0;
         for (Coordinate c : mSnakeTrail) {
             if (index == 0) {
@@ -426,7 +561,44 @@ public class SnakeGameView extends TileView {
 
     }
 
-	private class Coordinate {
+	private void shrinkSnake() {
+		mSnakeTrail.remove(mSnakeTrail.size() - 1);
+	}
+	
+	private void addRandomApples() {
+		addRandomApple();
+		addRandomApple();
+	}
+
+	private void addRandomApple() {
+        Coordinate newCoord = null;
+        boolean found = false;
+        while (!found) {
+            // Choose a new location for our apple
+            int newX = 1 + RNG.nextInt(mXTileCount - 2);
+            int newY = 1 + RNG.nextInt(mYTileCount - 2);
+            newCoord = new Coordinate(newX, newY);
+
+            // Make sure it's not already under the snake
+            boolean collision = false;
+            int snakelength = mSnakeTrail.size();
+            for (int index = 0; index < snakelength; index++) {
+                if (mSnakeTrail.get(index).equals(newCoord)) {
+                    collision = true;
+                }
+            }
+            // if we're here and there's been no collision, then we have
+            // a good location for an apple. Otherwise, we'll circle back
+            // and try again
+            found = !collision;
+        }
+        if (newCoord == null) {
+            Log.e(TAG, "Somehow ended up with a null newCoord!");
+        }
+        mAppleList.add(newCoord);
+	}
+
+	public class Coordinate {
         public int x;
         public int y;
 
