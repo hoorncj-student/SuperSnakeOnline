@@ -49,7 +49,7 @@ public class SnakeGameView extends TileView {
      * between snake movements. This will decrease as apples are captured.
      */
     private long mScore = 0;
-    private long mMoveDelay = 600;
+    private long mMoveDelay = 200;
     /**
      * mLastMove: Tracks the absolute time when the snake last moved, and is used to determine if a
      * move should be made based on mMoveDelay.
