@@ -1,0 +1,39 @@
+package edu.rosehulman.supersnakeonline;
+
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.Menu;
+import android.widget.EditText;
+import android.widget.ImageButton;
+
+public class SettingsActivity extends Activity {
+	
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_settings);
+		SharedPreferences settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE, 0);
+		String username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player");
+		if(!username.equals("Player")){
+			settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE+"_"+username, 0);
+			username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player1");
+		}
+		int color = settings.getInt(MainMenuActivity.COLOR_FIELD, MainMenuActivity.Color.RED.getValue());
+		int difficulty = settings.getInt(MainMenuActivity.DIFFICULTY_FIELD, MainMenuActivity.Difficulty.MEDIUM.getValue());
+		((EditText)findViewById(R.id.name_field)).setText(username);
+		switch(color){
+		case MainMenuActivity.Color.
+		}
+		((ImageButton)findViewById(R.id.color_button)).setImageDrawable(R.drawable.)
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Inflate the menu; this adds items to the action bar if it is present.
+		getMenuInflater().inflate(R.menu.settings, menu);
+		return true;
+	}
+
+}

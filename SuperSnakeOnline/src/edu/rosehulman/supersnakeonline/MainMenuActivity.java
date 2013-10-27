@@ -10,6 +10,17 @@ import android.widget.Button;
 
 public class MainMenuActivity extends Activity implements OnClickListener {
 
+	public static String PREFERENCES_FILE = "SnakePreferences";
+	public static String USERNAME_FIELD = "username";
+	public static String COLOR_FIELD = "snakeColor";
+	public static String DIFFICULTY_FIELD = "difficulty";
+	public static int DIFFICULTY_EASY = 0;
+	public static int DIFFICULTY_NORMAL = 1;
+	public static int DIFFICULTY_HARD = 2;
+	public static int COLOR_GREEN = 0;
+	public static int COLOR_YELLOW = 1;
+	public static int COLOR_RED = 2;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
