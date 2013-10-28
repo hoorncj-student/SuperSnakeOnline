@@ -11,6 +11,7 @@ import android.os.Message;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 public class SnakeGameView extends TileView {
 	private static final String TAG = "SnakeGameView";
@@ -43,6 +44,13 @@ public class SnakeGameView extends TileView {
     private static final int YELLOW_STAR = 2;
     private static final int GREEN_STAR = 3;
     private static final int POINT_STAR = 4;
+    private static final int APPLES_STAR = 5;
+    private static final int FAST_STAR = 6;
+    private static final int SLOW_STAR = 7;
+    private static final int SHORTEN_STAR = 8;
+    
+    //Color to use for the snake
+    private int snakeColor;
     
     /**
      * mScore: Used to track the number of apples captured mMoveDelay: number of milliseconds
@@ -50,6 +58,7 @@ public class SnakeGameView extends TileView {
      */
     private long mScore = 0;
     private long mMoveDelay = 200;
+    private TextView mScoreView;
     /**
      * mLastMove: Tracks the absolute time when the snake last moved, and is used to determine if a
      * move should be made based on mMoveDelay.
@@ -126,11 +135,16 @@ public class SnakeGameView extends TileView {
 
         Resources r = this.getContext().getResources();
 
-        resetTiles(5);
+        resetTiles(9);
         loadTile(RED_STAR, r.getDrawable(R.drawable.redstar)); 
         loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
         loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
-        loadTile(POINT_STAR, r.getDrawable(R.drawable.yellowstar1));
+        loadTile(POINT_STAR, r.getDrawable(R.drawable.apple));
+        loadTile(APPLES_STAR, r.getDrawable(R.drawable.apples));
+        loadTile(FAST_STAR, r.getDrawable(R.drawable.speedup));
+        loadTile(SLOW_STAR, r.getDrawable(R.drawable.slowdown));
+        loadTile(SHORTEN_STAR, r.getDrawable(R.drawable.shorten));
+        
     }
  
     public void initNewGame() {
@@ -408,7 +422,7 @@ public class SnakeGameView extends TileView {
             
             newPower.setCoord(newCoord);
         }
-        newPower.setPowerup(PowerupType.values()[RNG.nextInt(3)]);
+        newPower.setPowerup(PowerupType.values()[RNG.nextInt(4)]);
         
         if (newCoord == null) {
             Log.e(TAG, "Somehow ended up with a null newCoord!");
@@ -431,13 +445,16 @@ public class SnakeGameView extends TileView {
 			Coordinate c = p.getCoord();
 			switch(p.getPowerup().ordinal()) {
 			case(0): // slower red
-				setTile(RED_STAR, c.x, c.y);
+				setTile(SLOW_STAR, c.x, c.y);
 				break;
 			case(1): // apples yellow
-				setTile(YELLOW_STAR, c.x, c.y);
+				setTile(APPLES_STAR, c.x, c.y);
 				break;
 			case(2): // shrink green
-				setTile(GREEN_STAR, c.x, c.y);
+				setTile(SHORTEN_STAR, c.x, c.y);
+				break;
+			case(3): //speed up
+				setTile(FAST_STAR, c.x, c.y);
 				break;
 			}
 		}
@@ -520,18 +537,15 @@ public class SnakeGameView extends TileView {
         		switch(t.ordinal()) {
         		case(0): // slower
         			mMoveDelay *= 2;
-        			mScore++;
-        			growSnake = true;
         			break;
         		case(1): // apples
-					mMoveDelay *= 0.9;
         			addRandomApples();
-        			growSnake = true;
         			break;
         		case(2): // shrink
-					mMoveDelay *= 0.9;
         			shrinkSnake();
-					mScore++;
+        			break;
+        		case(3): // faster
+        			mMoveDelay /= 2;
         			break;
         		}
         		break;
@@ -544,6 +558,7 @@ public class SnakeGameView extends TileView {
             if (c.equals(newHead)) {
                 mAppleList.remove(c);
                 mScore++;
+                mScoreView.setText(mScore+"");
                 growSnake = true;
                 addRandomApple();
             }
@@ -560,11 +575,12 @@ public class SnakeGameView extends TileView {
         // snake color
         int index = 0;
         for (Coordinate c : mSnakeTrail) {
-            if (index == 0) {
+        	setTile(snakeColor, c.x, c.y);
+            /*if (index == 0) {
                 setTile(YELLOW_STAR, c.x, c.y);
             } else {
                 setTile(RED_STAR, c.x, c.y);
-            }
+            }*/
             index++;
         }
 
@@ -632,5 +648,25 @@ public class SnakeGameView extends TileView {
 
 	public long getScore() {
 		return this.mScore;
+	}
+
+	public void setSnakeColor(int color) {
+		Log.d("COL",color+"");
+		if(color == MainMenuActivity.COLOR_GREEN){
+			snakeColor = GREEN_STAR;
+		}else if(color == MainMenuActivity.COLOR_RED){
+			snakeColor = RED_STAR;
+		}else if(color == MainMenuActivity.COLOR_YELLOW){
+			snakeColor = YELLOW_STAR;
+		}
+	}
+
+	public void setDifficulty(int difficulty) {
+		Log.d("DIFF",difficulty+"");
+		mMoveDelay = (3-difficulty)*100;
+	}
+
+	public void setScoreView(View scoreView) {
+		mScoreView = (TextView) scoreView;
 	}
 }

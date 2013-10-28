@@ -17,6 +17,7 @@
 package edu.rosehulman.supersnakeonline;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -69,7 +70,19 @@ public class Snake extends Activity {
 
         mGestureDetector = new GestureDetector(this, new MyGestureDetector());
         
+        SharedPreferences settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE, 0);
+		String username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player");
+		if(!username.equals("Player")){
+			settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE+"_"+username, 0);
+			username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player1");
+		}
+		int color = settings.getInt(MainMenuActivity.COLOR_FIELD, MainMenuActivity.COLOR_GREEN);
+		int difficulty = settings.getInt(MainMenuActivity.DIFFICULTY_FIELD, MainMenuActivity.DIFFICULTY_NORMAL);
+        
         mSnakeView = (SnakeGameView) findViewById(R.id.snake);
+        mSnakeView.setScoreView(findViewById(R.id.score_text));
+        mSnakeView.setSnakeColor(color);
+		mSnakeView.setDifficulty(difficulty);
 
         if (savedInstanceState == null) {
             // We were just launched -- set up a new game

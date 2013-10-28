@@ -2,5 +2,5 @@ package edu.rosehulman.supersnakeonline;
 
 
 public enum PowerupType {
-	SLOWER, APPLES, SHRINK;
+	SLOWER, APPLES, SHRINK, FASTER;
 }

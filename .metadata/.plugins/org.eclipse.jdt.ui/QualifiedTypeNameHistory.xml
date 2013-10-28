@@ -6,11 +6,20 @@
 <fullyQualifiedTypeName name="java.util.ArrayList"/>
 <fullyQualifiedTypeName name="android.graphics.Color"/>
 <fullyQualifiedTypeName name="android.widget.ListView"/>
-<fullyQualifiedTypeName name="android.widget.TextView"/>
-<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.layout"/>
 <fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.attr"/>
 <fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R"/>
 <fullyQualifiedTypeName name="android.view.Gravity"/>
-<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.id"/>
 <fullyQualifiedTypeName name="android.app.ListActivity"/>
+<fullyQualifiedTypeName name="android.content.SharedPreferences"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.MainMenuActivity.Difficulty"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.MainMenuActivity"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.MainMenuActivity.Color"/>
+<fullyQualifiedTypeName name="android.widget.RadioGroup.OnCheckedChangeListener"/>
+<fullyQualifiedTypeName name="android.app.Dialog"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.layout"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.id"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.string"/>
+<fullyQualifiedTypeName name="android.util.Log"/>
+<fullyQualifiedTypeName name="edu.rosehulman.supersnakeonline.R.drawable"/>
+<fullyQualifiedTypeName name="android.widget.TextView"/>
 </qualifiedTypeNameHistroy>
