@@ -25,7 +25,9 @@ public class SnakeGameView extends TileView {
     public static final int RUNNING = 2;
     public static final int LOSE = 3;
     
-    private long mPowerupDelay = 10000;
+    private long mPowerupDelay = 8000;
+    private int level = 0;
+    private int numPointsToLevel = 3;
 	
     /**
      * Current direction the snake is headed.
@@ -48,6 +50,11 @@ public class SnakeGameView extends TileView {
     private static final int FAST_STAR = 6;
     private static final int SLOW_STAR = 7;
     private static final int SHORTEN_STAR = 8;
+    private static final int PORTAL = 9;
+    
+    // location of portal
+    private int x;
+    private int y;
     
     //Color to use for the snake
     private int snakeColor;
@@ -57,7 +64,7 @@ public class SnakeGameView extends TileView {
      * between snake movements. This will decrease as apples are captured.
      */
     private long mScore = 0;
-    private long mMoveDelay = 200;
+    private long mMoveDelay = 400;
     private TextView mScoreView;
     /**
      * mLastMove: Tracks the absolute time when the snake last moved, and is used to determine if a
@@ -88,6 +95,7 @@ public class SnakeGameView extends TileView {
      */
 
     private RefreshHandler mRedrawHandler = new RefreshHandler();
+	private boolean portalCreated = false;
     private static final Random RNG = new Random();
     
     class RefreshHandler extends Handler {
@@ -135,7 +143,7 @@ public class SnakeGameView extends TileView {
 
         Resources r = this.getContext().getResources();
 
-        resetTiles(9);
+        resetTiles(10);
         loadTile(RED_STAR, r.getDrawable(R.drawable.redstar)); 
         loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
         loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
@@ -144,6 +152,7 @@ public class SnakeGameView extends TileView {
         loadTile(FAST_STAR, r.getDrawable(R.drawable.speedup));
         loadTile(SLOW_STAR, r.getDrawable(R.drawable.slowdown));
         loadTile(SHORTEN_STAR, r.getDrawable(R.drawable.shorten));
+        loadTile(PORTAL, r.getDrawable(R.drawable.portal));
         
     }
  
@@ -153,16 +162,30 @@ public class SnakeGameView extends TileView {
         mPowerupList.clear();
         
 
-        mSnakeTrail.add(new Coordinate(7, 5));
-        mSnakeTrail.add(new Coordinate(6, 5));
-        mSnakeTrail.add(new Coordinate(5, 5));
-        mSnakeTrail.add(new Coordinate(4, 5));
-        mSnakeTrail.add(new Coordinate(3, 5));
-        mSnakeTrail.add(new Coordinate(2, 5));
+        mSnakeTrail.add(new Coordinate(7, 8));
+        //mSnakeTrail.add(new Coordinate(6, 8));
+        //mSnakeTrail.add(new Coordinate(5, 8));
+        //mSnakeTrail.add(new Coordinate(4, 8));
+        //mSnakeTrail.add(new Coordinate(3, 8));
+        //mSnakeTrail.add(new Coordinate(2, 8));
         mNextDirection = NORTH;
 
         mScore = 0;
         addRandomApple();
+    }
+    
+    public void initTransitionGame() {
+    	mSnakeTrail.clear();
+    	mAppleList.clear();
+    	mPowerupList.clear();
+    	
+        mSnakeTrail.add(new Coordinate(this.x, this.y));
+        mNextDirection = this.mDirection;
+        
+        this.portalCreated = false;
+        
+        addRandomApple();
+    	
     }
     
     /**
@@ -385,6 +408,7 @@ public class SnakeGameView extends TileView {
 	            clearTiles();
 	            updateWalls();
 	            updateSnake();
+	            updatePortal();
 	            updatePowerups();
 	            updateApples();
 	            mLastMove = now;
@@ -403,8 +427,8 @@ public class SnakeGameView extends TileView {
         boolean found = false;
         while (!found) {
             // Choose a new location for our apple
-            int newX = 1 + RNG.nextInt(mXTileCount - 2);
-            int newY = 1 + RNG.nextInt(mYTileCount - 2);
+            int newX = 1+level + RNG.nextInt(mXTileCount - 2-level);
+            int newY = 1+level + RNG.nextInt(mYTileCount - 2-level);
             newCoord = new Coordinate(newX, newY);
 
             // Make sure it's not already under the snake
@@ -464,13 +488,25 @@ public class SnakeGameView extends TileView {
      * Draws some walls.
      */
     private void updateWalls() {
-    	for (int x = 0; x < mXTileCount; x++) {
-            setTile(GREEN_STAR, x, 0);
-            setTile(GREEN_STAR, x, mYTileCount - 1);
+    	for (int x = 0+level; x < mXTileCount-level; x++) {
+            setTile(GREEN_STAR, x, 0+level);
+            setTile(GREEN_STAR, x, mYTileCount - 1 - level);
         }
-        for (int y = 1; y < mYTileCount - 1; y++) {
-            setTile(GREEN_STAR, 0, y);
-            setTile(GREEN_STAR, mXTileCount - 1, y);
+        for (int y = 1+level; y < mYTileCount - 1 - level; y++) {
+            setTile(GREEN_STAR, 0+level, y);
+            setTile(GREEN_STAR, mXTileCount - 1 - level, y);
+        }
+    }
+    
+ // if points reach a certain threshold, create portal so that snake starts in a new map at that location
+    private void updatePortal() {
+        if ((mScore % numPointsToLevel == 0 && mScore != 0) && !this.portalCreated) {
+            this.x = 2+level+RNG.nextInt(mXTileCount-3-level);
+        	this.y = 2+level+RNG.nextInt(mYTileCount-3-level);
+        	setTile(PORTAL, this.x, this.y);
+        	this.portalCreated  = true;
+        } else if (this.portalCreated) {
+        	setTile(PORTAL, this.x, this.y);
         }
     }
     
@@ -511,10 +547,18 @@ public class SnakeGameView extends TileView {
         // For now we have a 1-square wall around the entire arena
         if ((newHead.x < 1) || (newHead.y < 1) || (newHead.x > mXTileCount - 2)
                 || (newHead.y > mYTileCount - 2)) {
-            setMode(LOSE);
-            return;
-
+                setMode(LOSE);
+                return;
         }
+        
+        // portal collision
+    	if (this.portalCreated && newHead.x==this.x && newHead.y==this.y) {
+    		// go to new map
+    		level++;
+    		mScore++;
+    		initTransitionGame();
+    		update();
+    	} 
 
         // Look for collisions with itself
         int snakelength = mSnakeTrail.size();
@@ -539,7 +583,9 @@ public class SnakeGameView extends TileView {
         			mMoveDelay *= 2;
         			break;
         		case(1): // apples
-        			addRandomApples();
+        			//addRandomApples();
+        			mScore+=3;
+        			mScoreView.setText(mScore+"");
         			break;
         		case(2): // shrink
         			shrinkSnake();
