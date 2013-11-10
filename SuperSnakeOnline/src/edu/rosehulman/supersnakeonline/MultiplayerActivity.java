@@ -18,12 +18,17 @@ package edu.rosehulman.supersnakeonline;
 import edu.rosehulman.supersnakeonline.R;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.GestureDetector.SimpleOnGestureListener;
+import android.view.View.OnTouchListener;
 import android.widget.TextView;
 
 import com.google.android.gms.games.GamesActivityResultCodes;
@@ -90,6 +95,9 @@ public class MultiplayerActivity extends BaseGameActivity
 
     // The participants in the currently active game
     ArrayList<Participant> mParticipants = null;
+    
+    // The opponenet
+    Participant mOpponent = null;
 
     // My participant ID in the currently active game
     String mMyId = null;
@@ -115,6 +123,9 @@ public class MultiplayerActivity extends BaseGameActivity
         for (int id : CLICKABLES) {
             findViewById(id).setOnClickListener(this);
         }
+        mSnakeView = (SnakeGameView) findViewById(R.id.snake);
+        mSnakeView.setScoreView(findViewById(R.id.score_text));
+        mSnakeView.setOpponentScoreView(findViewById(R.id.opponent_score_text));
     }
 
     /**
@@ -174,7 +185,7 @@ public class MultiplayerActivity extends BaseGameActivity
                 break;
             case R.id.button_invite_players:
                 // show list of invitable players
-                intent = getGamesClient().getSelectPlayersIntent(1, 3);
+                intent = getGamesClient().getSelectPlayersIntent(1, 1);
                 switchToScreen(R.id.screen_wait);
                 startActivityForResult(intent, RC_SELECT_PLAYERS);
                 break;
@@ -365,13 +376,27 @@ public class MultiplayerActivity extends BaseGameActivity
             leaveRoom();
             return true;
         }
+        switch (keyCode) {
+        case KeyEvent.KEYCODE_DPAD_UP:
+            mSnakeView.moveSnake(MOVE_UP);
+            break;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+            mSnakeView.moveSnake(MOVE_RIGHT);
+            break;
+        case KeyEvent.KEYCODE_DPAD_DOWN:
+            mSnakeView.moveSnake(MOVE_DOWN);
+            break;
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+            mSnakeView.moveSnake(MOVE_LEFT);
+            break;
+        }
         return super.onKeyDown(keyCode, e);
     }
 
     // Leave the room.
     void leaveRoom() {
         Log.d(TAG, "Leaving room.");
-        mSecondsLeft = 0;
+        //mSecondsLeft = 0;
         stopKeepingScreenOn();
         if (mRoomId != null) {
             getGamesClient().leaveRoom(this, mRoomId);
@@ -429,6 +454,13 @@ public class MultiplayerActivity extends BaseGameActivity
         // get room ID, participants and my ID:
         mRoomId = room.getRoomId();
         mParticipants = room.getParticipants();
+        for (Participant p : mParticipants) {
+            if (p.getParticipantId().equals(mMyId))
+                continue;
+            if (p.getStatus() != Participant.STATUS_JOINED)
+                continue;
+            mOpponent = p;
+        }
         mMyId = room.getParticipantId(getGamesClient().getCurrentPlayerId());
 
         // print out the list of participants (for debug purposes)
@@ -544,6 +576,16 @@ public class MultiplayerActivity extends BaseGameActivity
 
     void updateRoom(Room room) {
         mParticipants = room.getParticipants();
+        for (Participant p : mParticipants) {
+            if (p.getParticipantId().equals(mMyId))
+                continue;
+            if (p.getStatus() != Participant.STATUS_JOINED)
+                continue;
+            mOpponent = p;
+        }
+        if(mOpponent == null){
+        	Log.d("HI","crap");
+        }
         updatePeerScoresDisplay();
     }
 
@@ -552,34 +594,35 @@ public class MultiplayerActivity extends BaseGameActivity
      */
 
     // Current state of the game:
-    int mSecondsLeft = -1; // how long until the game ends (seconds)
-    final static int GAME_DURATION = 20; // game duration, seconds.
-    int mScore = 0; // user's current score
+    //int mSecondsLeft = -1; // how long until the game ends (seconds)
+    //final static int GAME_DURATION = 20; // game duration, seconds.
 
     // Reset game variables in preparation for a new game.
     void resetGameVars() {
-        mSecondsLeft = GAME_DURATION;
-        mScore = 0;
-        mParticipantScore.clear();
-        mFinishedParticipants.clear();
+        //mParticpantScore.clear();
+        mParticipantScore = 0;
+        //mFinishedParticipants.clear();
+        participantFinished = false;
     }
 
     // Start the gameplay phase of the game.
     void startGame(boolean multiplayer) {
         mMultiplayer = multiplayer;
-        updateScoreDisplay();
+        //updateScoreDisplay();
         broadcastScore(false);
-        switchToScreen(R.id.screen_game);
+        
+        createSnakeGame();
+        //switchToScreen(R.id.screen_game);
 
-        findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
+        //findViewById(R.id.button_click_me).setVisibility(View.VISIBLE);
 
         // run the gameTick() method every second to update the game.
         final Handler h = new Handler();
         h.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (mSecondsLeft <= 0)
-                    return;
+                /*if (mSecondsLeft <= 0)
+                    return;*/
                 gameTick();
                 h.postDelayed(this, 1000);
             }
@@ -587,7 +630,7 @@ public class MultiplayerActivity extends BaseGameActivity
     }
 
     // Game tick -- update countdown, check if game ended.
-    void gameTick() {
+    /*void gameTick() {
         if (mSecondsLeft > 0)
             --mSecondsLeft;
 
@@ -600,19 +643,26 @@ public class MultiplayerActivity extends BaseGameActivity
             findViewById(R.id.button_click_me).setVisibility(View.GONE);
             broadcastScore(true);
         }
+    }*/
+    
+    void gameTick(){
+    	if(mSnakeView.getMode() == SnakeGameView.LOSE){
+    		broadcastScore(true);
+    	}else{
+    		broadcastScore(false);
+    	}
     }
 
     // indicates the player scored one point
-    void scoreOnePoint() {
+    /*void scoreOnePoint() {
         if (mSecondsLeft <= 0)
             return; // too late!
         ++mScore;
-        updateScoreDisplay();
         updatePeerScoresDisplay();
 
         // broadcast our new score to our peers
         broadcastScore(false);
-    }
+    }*/
 
     /*
      * COMMUNICATIONS SECTION. Methods that implement the game's network
@@ -621,10 +671,12 @@ public class MultiplayerActivity extends BaseGameActivity
 
     // Score of other participants. We update this as we receive their scores
     // from the network.
-    Map<String, Integer> mParticipantScore = new HashMap<String, Integer>();
+    //Map<String, Integer> mParticipantScore = new HashMap<String, Integer>();
+    int mParticipantScore;
 
     // Participants who sent us their final score.
-    Set<String> mFinishedParticipants = new HashSet<String>();
+    //Set<String> mFinishedParticipants = new HashSet<String>();
+    boolean participantFinished;
 
     // Called when we receive a real-time message from the network.
     // Messages in our game are made up of 2 bytes: the first one is 'F' or 'U'
@@ -640,8 +692,9 @@ public class MultiplayerActivity extends BaseGameActivity
 
         if (buf[0] == 'F' || buf[0] == 'U') {
             // score update.
-            int existingScore = mParticipantScore.containsKey(sender) ?
-                    mParticipantScore.get(sender) : 0;
+            /*int existingScore = mParticipantScore.containsKey(sender) ?
+                    mParticipantScore.get(sender) : 0;*/
+        	int existingScore = mParticipantScore != 0 ? mParticipantScore : 0;
             int thisScore = (int) buf[1];
             if (thisScore > existingScore) {
                 // this check is necessary because packets may arrive out of
@@ -651,7 +704,8 @@ public class MultiplayerActivity extends BaseGameActivity
                 // game there is no way to lose points. If there was a way to
                 // lose points,
                 // we'd have to add a "serial number" to the packet.
-                mParticipantScore.put(sender, thisScore);
+                //mParticipantScore.put(sender, thisScore);
+            	mParticipantScore = thisScore;
             }
 
             // update the scores on the screen
@@ -660,7 +714,8 @@ public class MultiplayerActivity extends BaseGameActivity
             // if it's a final score, mark this participant as having finished
             // the game
             if ((char) buf[0] == 'F') {
-                mFinishedParticipants.add(rtm.getSenderParticipantId());
+                //mFinishedParticipants.add(rtm.getSenderParticipantId());
+            	participantFinished = true;
             }
         } else if (buf[0] == 'S') {
             // someone else started to play -- so dismiss the waiting room and
@@ -680,7 +735,9 @@ public class MultiplayerActivity extends BaseGameActivity
         mMsgBuf[0] = (byte) (finalScore ? 'F' : 'U');
 
         // Second byte is the score.
-        mMsgBuf[1] = (byte) mScore;
+        //mMsgBuf[1] = (byte) mScore;
+        
+        mMsgBuf[1] = (byte) mSnakeView.getScore();
 
         // Send to every other participant.
         for (Participant p : mParticipants) {
@@ -703,7 +760,7 @@ public class MultiplayerActivity extends BaseGameActivity
     // Broadcast a message indicating that we're starting to play. Everyone else
     // will react
     // by dismissing their waiting room UIs and starting to play too.
-    void broadcastStart() {
+    /*void broadcastStart() {
         if (!mMultiplayer)
             return; // playing single-player mode
 
@@ -717,6 +774,15 @@ public class MultiplayerActivity extends BaseGameActivity
             getGamesClient().sendReliableRealTimeMessage(null, mMsgBuf, mRoomId,
                     p.getParticipantId());
         }
+    }*/
+    
+    void broadcastStart(){
+    	if (!mMultiplayer)
+            return; // playing single-player mode
+
+        mMsgBuf[0] = 'S';
+        mMsgBuf[1] = (byte) 0;
+        getGamesClient().sendReliableRealTimeMessage(null, mMsgBuf, mRoomId, mOpponent.getParticipantId());
     }
 
     /*
@@ -735,7 +801,7 @@ public class MultiplayerActivity extends BaseGameActivity
     // This array lists all the individual screens our game has.
     final static int[] SCREENS = {
             R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
-            R.id.screen_wait
+            R.id.screen_wait, R.id.screen_snake
     };
     int mCurScreen = -1;
 
@@ -766,20 +832,20 @@ public class MultiplayerActivity extends BaseGameActivity
     }
 
     // updates the label that shows my score
-    void updateScoreDisplay() {
+    /*void updateScoreDisplay() {
         ((TextView) findViewById(R.id.my_score)).setText(formatScore(mScore));
-    }
+    }*/
 
     // formats a score as a three-digit number
-    String formatScore(int i) {
+    /*String formatScore(int i) {
         if (i < 0)
             i = 0;
         String s = String.valueOf(i);
         return s.length() == 1 ? "00" + s : s.length() == 2 ? "0" + s : s;
-    }
+    }*/
 
     // updates the screen with the scores from our peers
-    void updatePeerScoresDisplay() {
+    /*void updatePeerScoresDisplay() {
         ((TextView) findViewById(R.id.score0)).setText(formatScore(mScore) + " - Me");
         int[] arr = {
                 R.id.score1, R.id.score2, R.id.score3
@@ -803,6 +869,15 @@ public class MultiplayerActivity extends BaseGameActivity
         for (; i < arr.length; ++i) {
             ((TextView) findViewById(arr[i])).setText("");
         }
+    }*/
+    
+    void updatePeerScoresDisplay() {
+    	if(mOpponent == null){
+    		Log.d("CRAP","Opponent");
+    	}else if(mOpponent.getDisplayName() == null){
+    		Log.d("CRAP","Name");
+    	}
+    	mSnakeView.setOpponentScore(mOpponent.getDisplayName()+" - "+mParticipantScore);
     }
 
     /*
@@ -859,4 +934,134 @@ public class MultiplayerActivity extends BaseGameActivity
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public static int MOVE_LEFT = 0;
+    public static int MOVE_UP = 1;
+    public static int MOVE_DOWN = 2;
+    public static int MOVE_RIGHT = 3;
+
+    private static String ICICLE_KEY = "snake-view";
+
+    private SnakeGameView mSnakeView;
+    private GestureDetector mGestureDetector;
+	
+	
+    public void createSnakeGame() {
+    	switchToScreen(R.id.screen_snake);
+        Log.d(ICICLE_KEY,"started game");
+
+        mGestureDetector = new GestureDetector(this, new MyGestureDetector());
+        
+        SharedPreferences settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE, 0);
+		String username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player");
+		if(!username.equals("Player")){
+			settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE+"_"+username, 0);
+			username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player1");
+		}
+		int color = settings.getInt(MainMenuActivity.COLOR_FIELD, MainMenuActivity.COLOR_GREEN);
+		int difficulty = settings.getInt(MainMenuActivity.DIFFICULTY_FIELD, MainMenuActivity.DIFFICULTY_NORMAL);
+        
+        //mSnakeView = (SnakeGameView) findViewById(R.id.snake);
+        //mSnakeView.setScoreView(findViewById(R.id.score_text));
+        //mSnakeView.setOpponentScoreView(findViewById(R.id.opponent_score_text));
+        mSnakeView.setSnakeColor(color);
+		//mSnakeView.setDifficulty(difficulty);
+
+        /*if (savedInstanceState == null) {
+            // We were just launched -- set up a new game
+            mSnakeView.setMode(SnakeGameView.READY);
+        } else {
+            // We are being restored
+            Bundle map = savedInstanceState.getBundle(ICICLE_KEY);
+            if (map != null) {
+                mSnakeView.restoreState(map);
+            } else {
+                mSnakeView.setMode(SnakeGameView.PAUSE);
+            }
+        }*/
+        mSnakeView.setMode(SnakeGameView.READY);
+        mSnakeView.setOnTouchListener(new OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+            	if (mSnakeView.getGameState() == SnakeGameView.RUNNING && mGestureDetector.onTouchEvent(event)) {
+            		return true;
+            	} 
+            	
+            	
+                if (mSnakeView.getGameState() == SnakeGameView.RUNNING) {
+                    // Normalize x,y between 0 and 1
+                    float x = event.getX() / v.getWidth();
+                    float y = event.getY() / v.getHeight();
+
+                    // Direction will be [0,1,2,3] depending on quadrant
+                    int direction = 0;
+                    direction = (x > y) ? 1 : 0;
+                    direction |= (x > 1 - y) ? 2 : 0;
+
+                    // Direction is same as the quadrant which was clicked
+                    mSnakeView.moveSnake(direction);
+
+                } else if (mSnakeView.getGameState() != SnakeGameView.RUNNING) {
+                    // If the game is not running then on touching any part of the screen
+                    // we start the game by sending MOVE_UP signal to SnakeGameView
+                    mSnakeView.moveSnake(MOVE_UP);
+                }
+                return false;
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Pause the game along with the activity
+        mSnakeView.setMode(SnakeGameView.PAUSE);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // Store the game state
+        outState.putBundle(ICICLE_KEY, mSnakeView.saveState());
+    }
+
+    private class MyGestureDetector extends SimpleOnGestureListener {
+        // PART E
+    	@Override
+    	public boolean onDown(MotionEvent e) {
+    		return true;
+    	}
+    	
+    	@Override
+    	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+    			float velocityY) {
+    		
+    		float dX = e2.getX() - e1.getX();
+    		float dY = e1.getY() - e2.getY();
+    		if (Math.abs(dY)<100 && Math.abs(velocityX)>=100 && Math.abs(dX)>=100) {
+    			if (dX > 0) {
+    				// fling right
+    				Log.d("Fling", "Move right");
+    				mSnakeView.moveSnake(MOVE_RIGHT);
+    			} else {
+    				// fling left
+    				Log.d("Fling", "Move left");
+    				mSnakeView.moveSnake(MOVE_LEFT);
+    			}
+    			return true;
+    		} else if (Math.abs(dX)<100 && Math.abs(velocityY)>=100 && Math.abs(dY)>=100) {
+    			if (dY > 0) {
+    				// fling up
+    				Log.d("Fling", "Move up");
+    				mSnakeView.moveSnake(MOVE_UP);
+    			} else {
+    				// fling down
+    				Log.d("Fling", "Move down");
+    				mSnakeView.moveSnake(MOVE_DOWN);
+    			}
+    			return true;
+    		}
+    		return false;
+    	}
+    }
 }

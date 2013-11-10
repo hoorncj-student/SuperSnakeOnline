@@ -93,7 +93,7 @@
     </LinearLayout>
     
     <!--  SNAKE SCREEN -->
-    <RelativeLayout
+    <RelativeLayout android:id="@+id/screen_snake"
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
 	    android:background="@color/greenstuff"
@@ -113,6 +113,15 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_centerHorizontal="true"
+	        android:textSize="20sp"
+	        android:text="0"/>
+	    
+	    <TextView 
+	        android:id="@+id/opponent_score_text"
+	        android:layout_alignParentTop="true"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
 	        android:textSize="20sp"
 	        android:text="0"/>
 

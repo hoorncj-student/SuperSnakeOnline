@@ -73,8 +73,9 @@ public class SnakeGameView extends TileView {
      * between snake movements. This will decrease as apples are captured.
      */
     private long mScore = 0;
-    private long mMoveDelay = 400;
+    private long mMoveDelay = 200;
     private TextView mScoreView;
+    private TextView mOppScoreView;
     /**
      * mLastMove: Tracks the absolute time when the snake last moved, and is used to determine if a
      * move should be made based on mMoveDelay.
@@ -733,5 +734,22 @@ public class SnakeGameView extends TileView {
 
 	public void setScoreView(View scoreView) {
 		mScoreView = (TextView) scoreView;
+	}
+	
+	public void setOpponentScoreView(View oppScoreView){
+		if(oppScoreView == null){
+			Log.d("CRAP","setView");
+		}
+		Log.d("NORM","settingView");
+		mOppScoreView = (TextView)oppScoreView;
+	}
+	
+	public void setOpponentScore(String score){
+		if(score == null){
+			Log.d("CRAP","view");
+		}else if(mOppScoreView == null){
+			Log.d("CRAP","oppScore");
+		}
+		mOppScoreView.setText(score);
 	}
 }
