@@ -13,6 +13,13 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
+        <meta-data android:name="com.google.android.gms.games.APP_ID"
+            android:value="@string/app_id" />
+        
+        <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version"/>
+        
         <activity
             android:name="edu.rosehulman.supersnakeonline.MainMenuActivity"
             android:label="@string/app_name" >
@@ -41,6 +48,10 @@
         <activity
             android:name="edu.rosehulman.supersnakeonline.OnlineLobbyActivity"
             android:label="@string/title_activity_online_lobby" >
+        </activity>
+        <activity
+            android:name="edu.rosehulman.supersnakeonline.MultiplayerActivity"
+            android:label="@string/title_activity_multiplayer" >
         </activity>
     </application>
 

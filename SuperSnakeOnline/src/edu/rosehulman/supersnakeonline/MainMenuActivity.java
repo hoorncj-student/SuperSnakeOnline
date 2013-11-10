@@ -102,7 +102,7 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 			break;
 		case R.id.two_player_button:
 			sounds.play(buttonSound, 1.0f, 1.0f, 0, 0, 1.5f);
-			Intent twoPlayerIntent = new Intent(this, OnlineLobbyActivity.class);
+			Intent twoPlayerIntent = new Intent(this, MultiplayerActivity.class);
 			//onPlayerIntent.putExtra(KEY_NUM_BUTTONS, mNumButtons);
 			startActivity(twoPlayerIntent);
 			break;
@@ -126,13 +126,13 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 	
 	@Override
 	protected void onStop() {
-		mServ.pauseMusic();
+		//mServ.pauseMusic();
 		super.onStop();
 	}
 	
 	@Override
 	protected void onRestart() {
-		mServ.resumeMusic();
+		//mServ.resumeMusic();
 		super.onRestart();
 	}
 	

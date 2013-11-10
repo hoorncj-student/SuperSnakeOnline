@@ -51,5 +51,6 @@
     <string name="game_problem">An error occurred while starting the game. Please try again.</string>
     <string name="click_me">Click me!</string>
     <string name="is_inviting_you">is challenging you to a game!</string>
+    <string name="title_activity_multiplayer">MultiplayerActivity</string>
 
 </resources>
