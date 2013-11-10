@@ -7,21 +7,25 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.RadioGroup.OnCheckedChangeListener;
+import android.widget.ToggleButton;
 
-public class SettingsActivity extends Activity implements OnCheckedChangeListener, OnClickListener {
+public class SettingsActivity extends Activity implements OnCheckedChangeListener, OnClickListener, android.widget.CompoundButton.OnCheckedChangeListener {
 	private int currentColor;
 	private int currentDifficulty;
 	private Dialog colorDialog;
+	public static boolean musicOff = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 		SharedPreferences settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE, 0);
+		musicOff = settings.getBoolean(MainMenuActivity.MUSIC_ON, false);
 		String username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player");
 		if(!username.equals("Player")){
 			settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE+"_"+username, 0);
@@ -50,6 +54,8 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 		((RadioGroup)findViewById(R.id.difficulty_buttons)).setOnCheckedChangeListener(this);
 		
 		((ImageButton)findViewById(R.id.color_button)).setOnClickListener(this);
+		
+		((ToggleButton)findViewById(R.id.music_toggle)).setOnCheckedChangeListener(this);
 	}
 
 	@Override
@@ -74,6 +80,7 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 	    editor.putString(MainMenuActivity.USERNAME_FIELD, setName);
 	    editor.putInt(MainMenuActivity.COLOR_FIELD, currentColor);
 	    editor.putInt(MainMenuActivity.DIFFICULTY_FIELD, currentDifficulty);
+	    editor.putBoolean(MainMenuActivity.MUSIC_ON, musicOff);
 	    editor.commit();
 	}
 
@@ -127,4 +134,8 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 		}
 	}
 
+	@Override
+	public void onCheckedChanged(CompoundButton b, boolean checked) {
+		musicOff = checked;
+	}
 }

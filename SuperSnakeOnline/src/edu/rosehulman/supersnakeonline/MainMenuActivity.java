@@ -1,15 +1,12 @@
 package edu.rosehulman.supersnakeonline;
 
-import edu.rosehulman.supersnakeonline.SnakeMusic.ServiceBinder;
 import android.app.Activity;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -21,47 +18,18 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 	public static String USERNAME_FIELD = "username";
 	public static String COLOR_FIELD = "snakeColor";
 	public static String DIFFICULTY_FIELD = "difficulty";
+	public static String MUSIC_ON = "true";
 	public static int DIFFICULTY_EASY = 0;
 	public static int DIFFICULTY_NORMAL = 1;
 	public static int DIFFICULTY_HARD = 2;
 	public static int COLOR_GREEN = 0;
 	public static int COLOR_YELLOW = 1;
 	public static int COLOR_RED = 2;
-	private boolean mIsBound = false;
-	public static SnakeMusic mServ;
 	
     // sounds
     private SoundPool sounds;
     private int buttonSound;
-	
-	private ServiceConnection conn = new ServiceConnection() {
-		
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			mServ = null;
-		}
-		
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			ServiceBinder binder = (ServiceBinder)service;
-			mServ = binder.getService();
-		}
-	};
-	
-	private void doBindService(Intent music){
-		music.setClass(this, SnakeMusic.class);
- 		bindService(music, conn, Context.BIND_AUTO_CREATE);
-		mIsBound = true;
-	}
-
-	private void doUnbindService()
-	{
-		if(mIsBound)
-		{
-			unbindService(conn);
-      		mIsBound = false;
-		}
-	}
+    //private BackgroundSound mBSound; TODO
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +37,10 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 		setContentView(R.layout.activity_main_menu);
 		
 		// button sound
-    	sounds = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+    	sounds = new SoundPool(20, AudioManager.STREAM_MUSIC, 0);
     	buttonSound = sounds.load(this, R.raw.button, 1);
-		
-		// background music
-		Intent music = new Intent();
-		doBindService(music);
-		startService(music);
-		
+    	//mBSound = new BackgroundSound();
+    	
 		// button handler
 		((Button)findViewById(R.id.one_player_button)).setOnClickListener(this);
 		((Button)findViewById(R.id.two_player_button)).setOnClickListener(this);
@@ -124,20 +88,30 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 		}
 	}
 	
+	/*
 	@Override
 	protected void onStop() {
-		//mServ.pauseMusic();
 		super.onStop();
+		mBSound.cancel(true);
 	}
 	
 	@Override
 	protected void onRestart() {
-		//mServ.resumeMusic();
 		super.onRestart();
+		mBSound.execute();
 	}
 	
-	protected void onDestroy() {
-		doUnbindService();
-		super.onDestroy();
-	}
+	class BackgroundSound extends AsyncTask<Void, Void, Void> {
+	    @Override
+	    protected Void doInBackground(Void... params) {
+	    	if (!SettingsActivity.musicOff) {
+		        MediaPlayer player = MediaPlayer.create(MainMenuActivity.this, R.raw.arab); 
+		        player.setLooping(true); // Set looping 
+		        player.setVolume(100,100); 
+		        player.start(); 
+	    	} 
+
+	        return null;
+	    }
+	}*/
 }
