@@ -17,10 +17,19 @@
         android:id="@+id/settings_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="30dp"
         android:layout_weight="1"
-        android:text="@string/settings_title" 
-        android:textSize="84sp"
-        android:layout_margin="30dp"/>
+        android:text="@string/settings_title"
+        android:textSize="50sp" />
+
+    <ToggleButton
+        android:id="@+id/music_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_margin="10dp"
+        android:textOn="@string/music_off"
+        android:textOff="@string/music_on" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -35,7 +44,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="@string/name_prompt"
-            android:textSize="54sp" />
+            android:textSize="30sp" />
 
         <EditText
             android:id="@+id/name_field"
@@ -62,7 +71,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="@string/snake_color"
-            android:textSize="54sp" />
+            android:textSize="30sp" />
 
         <ImageButton
             android:id="@+id/color_button"
@@ -87,7 +96,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="@string/difficulty"
-            android:textSize="54sp" />
+            android:textSize="30sp" />
 
         <RadioGroup
             android:id="@+id/difficulty_buttons"
@@ -96,28 +105,28 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:layout_marginTop="10dp"
-            android:layout_marginBottom="50dp" >
+            android:layout_marginBottom="30dp" >
 
             <RadioButton
                 android:id="@+id/easy_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/easy_radio_button"
-                android:textSize="30sp" />
+                android:textSize="20sp" />
 
             <RadioButton
                 android:id="@+id/medium_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/medium_radio_button"
-                android:textSize="30sp" />
+                android:textSize="20sp" />
 
             <RadioButton
                 android:id="@+id/hard_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/hard_radio_button"
-                android:textSize="30sp" />
+                android:textSize="20sp" />
         </RadioGroup>
     </LinearLayout>
 

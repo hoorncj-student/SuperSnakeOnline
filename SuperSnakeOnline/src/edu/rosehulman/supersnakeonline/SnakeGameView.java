@@ -1,6 +1,9 @@
 package edu.rosehulman.supersnakeonline;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 import android.content.Context;
@@ -81,6 +84,7 @@ public class SnakeGameView extends TileView {
      */
     private long mLastMove;
     private long mLastPowerTime;
+    private long mPowerLife = 10000;
     
     /**
      * mSnakeTrail: A list of Coordinates that make up the snake's body.
@@ -90,7 +94,8 @@ public class SnakeGameView extends TileView {
     /**
      * mPowerupList
      */
-    private ArrayList<Powerup> mPowerupList = new ArrayList<Powerup>();
+    private Queue<Powerup> mPowerupList = new LinkedList<Powerup>();
+    private Queue<Long> mPowerupSpawnList = new LinkedList<Long>();
     
     /**
      * mAppleList
@@ -173,6 +178,7 @@ public class SnakeGameView extends TileView {
         mSnakeTrail.clear();
         mAppleList.clear();
         mPowerupList.clear();
+        mPowerupSpawnList.clear();
         
 
         mSnakeTrail.add(new Coordinate(7, 8));
@@ -191,6 +197,7 @@ public class SnakeGameView extends TileView {
     	mSnakeTrail.clear();
     	mAppleList.clear();
     	mPowerupList.clear();
+    	mPowerupSpawnList.clear();
     	
         mSnakeTrail.add(new Coordinate(this.x, this.y));
         mNextDirection = this.mDirection;
@@ -235,20 +242,23 @@ public class SnakeGameView extends TileView {
         map.putLong("mMoveDelay", Long.valueOf(mMoveDelay));
         map.putLong("mScore", Long.valueOf(mScore));
         map.putIntArray("mSnakeTrail", coordArrayListToArray(mSnakeTrail));
-        map.putIntArray("mPowerupList", coordArrayListToArray(mPowerupList, 0));
-
+        map.putIntArray("mPowerupList", coordQueueToArray(mPowerupList, 0));
         return map;
     }
-    
-    private int[] coordArrayListToArray(ArrayList<Powerup> cvec, int k) {
-        int[] rawArray = new int[cvec.size() * 3];
 
-        for (int i=0; i<cvec.size(); i++) {
-        	Coordinate c = cvec.get(i).getCoord();
-        	PowerupType t = cvec.get(i).getPowerup();
+	private int[] coordQueueToArray(Queue<Powerup> cvec, int k) {
+        int[] rawArray = new int[cvec.size() * 3];
+        
+        Iterator<Powerup> it = cvec.iterator();
+        int i=0;
+        while (it.hasNext()) {
+        	Powerup nextPower = (Powerup) it.next();
+        	Coordinate c = nextPower.getCoord();
+        	PowerupType t = nextPower.getPowerup();
             rawArray[i++] = c.x;
             rawArray[i++] = c.y;
             rawArray[i++] = t.ordinal();
+        	i++;
         }
         return rawArray;
 	}
@@ -283,11 +293,11 @@ public class SnakeGameView extends TileView {
         mMoveDelay = icicle.getLong("mMoveDelay");
         mScore = icicle.getLong("mScore");
         mSnakeTrail = coordArrayToArrayList(icicle.getIntArray("mSnakeTrail"));
-        mPowerupList = coordArrayToArrayList(icicle.getIntArray("mPowerupList"), 0);
+        mPowerupList = coordArrayToQueue(icicle.getIntArray("mPowerupList"));
     }
     
-    private ArrayList<Powerup> coordArrayToArrayList(int[] rawArray, int k) {
-        ArrayList<Powerup> powerArrayList = new ArrayList<Powerup>();
+    private Queue<Powerup> coordArrayToQueue(int[] rawArray) {
+        Queue<Powerup> powerQueue = new LinkedList<Powerup>();
         Powerup p = new Powerup();
 
         int coordCount = rawArray.length;
@@ -295,11 +305,11 @@ public class SnakeGameView extends TileView {
             Coordinate c = new Coordinate(rawArray[index], rawArray[index + 1]);
             p.setCoord(c);
             p.setPowerup(PowerupType.values()[rawArray[index+2]]);
-            powerArrayList.add(p);
+            powerQueue.add(p);
             
         }
-        return powerArrayList;
-    }
+        return powerQueue;
+	}
     
     /**
      * Handles snake movement triggers from Snake Activity and moves the snake accordingly. Ignore
@@ -427,8 +437,16 @@ public class SnakeGameView extends TileView {
 	            mLastMove = now;
 	        }
 	        if (now - mLastPowerTime > mPowerupDelay) {
+	        	mPowerupSpawnList.add(now);
 	        	addRandomPowerup();
 	        	mLastPowerTime = now;
+	        }
+	        if (!mPowerupSpawnList.isEmpty()) {
+	        	long firstSpawn = mPowerupSpawnList.peek();
+		        if (now - firstSpawn > mPowerLife)  {
+		        	mPowerupSpawnList.remove();
+	        		mPowerupList.remove();
+		        }
 	        }
 	        mRedrawHandler.sleep(mMoveDelay);
     	}
@@ -440,8 +458,8 @@ public class SnakeGameView extends TileView {
         boolean found = false;
         while (!found) {
             // Choose a new location for our apple
-            int newX = 1+level + RNG.nextInt(mXTileCount - 2-level);
-            int newY = 1+level + RNG.nextInt(mYTileCount - 2-level);
+            int newX = 2+level + RNG.nextInt(mXTileCount - 3-level);
+            int newY = 2+level + RNG.nextInt(mYTileCount - 3-level);
             newCoord = new Coordinate(newX, newY);
 
             // Make sure it's not already under the snake
@@ -588,9 +606,9 @@ public class SnakeGameView extends TileView {
         }
 
         // Look for powerups
-        int powerCount = mPowerupList.size();
-        for (int i=0; i<powerCount; i++) {
-        	Powerup p = mPowerupList.get(i);
+        Iterator<Powerup> it = mPowerupList.iterator();
+        while (it.hasNext()) {
+        	Powerup p = it.next();
         	Coordinate c = p.getCoord();
         	PowerupType t = p.getPowerup();
         	if (c.equals(newHead)) {
@@ -654,20 +672,14 @@ public class SnakeGameView extends TileView {
 	private void shrinkSnake() {
 		mSnakeTrail.remove(mSnakeTrail.size() - 1);
 	}
-	
-	private void addRandomApples() {
-		addRandomApple();
-		addRandomApple();
-	}
 
 	private void addRandomApple() {
         Coordinate newCoord = null;
         boolean found = false;
         while (!found) {
             // Choose a new location for our apple
-        	int thing = mXTileCount;
-            int newX = 1 + RNG.nextInt(mXTileCount - 2);
-            int newY = 1 + RNG.nextInt(mYTileCount - 2);
+            int newX = 2 + RNG.nextInt(mXTileCount - 3);
+            int newY = 2 + RNG.nextInt(mYTileCount - 3);
             newCoord = new Coordinate(newX, newY);
 
             // Make sure it's not already under the snake
