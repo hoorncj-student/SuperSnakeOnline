@@ -445,8 +445,10 @@ public class SnakeGameView extends TileView {
 	        if (!mPowerupSpawnList.isEmpty()) {
 	        	long firstSpawn = mPowerupSpawnList.peek();
 		        if (now - firstSpawn > mPowerLife)  {
+		        	if(mPowerupSpawnList.size() == mPowerupList.size()){
+		        		mPowerupList.remove();
+		        	}
 		        	mPowerupSpawnList.remove();
-	        		mPowerupList.remove();
 		        }
 	        }
 	        mRedrawHandler.sleep(mMoveDelay);
