@@ -27,7 +27,7 @@ public class SnakeMusic extends Service  implements MediaPlayer.OnErrorListener{
     public IBinder onBind(Intent arg0){return mBinder;}
 
     @Override
-    public void onCreate (){
+    public void onCreate(){
 	  super.onCreate();
 
        mPlayer = MediaPlayer.create(this, R.raw.arab);

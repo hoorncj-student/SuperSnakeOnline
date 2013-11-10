@@ -5,6 +5,8 @@ import java.util.Random;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -56,8 +58,15 @@ public class SnakeGameView extends TileView {
     private int x;
     private int y;
     
-    //Color to use for the snake
+    // color to use for the snake
     private int snakeColor;
+    
+    // sounds
+    private SoundPool sounds;
+    private int powerupSound;
+    private int portalSound;
+    private int portalCreateSound;
+    private int explosionSound;
     
     /**
      * mScore: Used to track the number of apples captured mMoveDelay: number of milliseconds
@@ -138,6 +147,11 @@ public class SnakeGameView extends TileView {
 	}
     
     private void initSnakeGameView(Context context) {
+    	sounds = new SoundPool(30, AudioManager.STREAM_MUSIC, 0);
+    	powerupSound = sounds.load(context, R.raw.powerup, 1);
+    	portalSound = sounds.load(context, R.raw.portal, 1);
+    	portalCreateSound = sounds.load(context, R.raw.portalcreate, 1);
+    	explosionSound = sounds.load(context, R.raw.explosion, 1);
 
         setFocusable(true);
 
@@ -153,7 +167,6 @@ public class SnakeGameView extends TileView {
         loadTile(SLOW_STAR, r.getDrawable(R.drawable.slowdown));
         loadTile(SHORTEN_STAR, r.getDrawable(R.drawable.shorten));
         loadTile(PORTAL, r.getDrawable(R.drawable.portal));
-        
     }
  
     public void initNewGame() {
@@ -501,6 +514,7 @@ public class SnakeGameView extends TileView {
  // if points reach a certain threshold, create portal so that snake starts in a new map at that location
     private void updatePortal() {
         if ((mScore % numPointsToLevel == 0 && mScore != 0) && !this.portalCreated) {
+        	sounds.play(portalCreateSound, 1.0f, 1.0f, 0, 0, 1.5f);
             this.x = 2+level+RNG.nextInt(mXTileCount-3-level);
         	this.y = 2+level+RNG.nextInt(mYTileCount-3-level);
         	setTile(PORTAL, this.x, this.y);
@@ -547,6 +561,7 @@ public class SnakeGameView extends TileView {
         // For now we have a 1-square wall around the entire arena
         if ((newHead.x < 1) || (newHead.y < 1) || (newHead.x > mXTileCount - 2)
                 || (newHead.y > mYTileCount - 2)) {
+        		sounds.play(explosionSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 setMode(LOSE);
                 return;
         }
@@ -554,6 +569,7 @@ public class SnakeGameView extends TileView {
         // portal collision
     	if (this.portalCreated && newHead.x==this.x && newHead.y==this.y) {
     		// go to new map
+    		sounds.play(portalSound, 1.0f, 1.0f, 0, 0, 1.5f);
     		level++;
     		mScore++;
     		initTransitionGame();
@@ -565,6 +581,7 @@ public class SnakeGameView extends TileView {
         for (int snakeindex = 0; snakeindex < snakelength; snakeindex++) {
             Coordinate c = mSnakeTrail.get(snakeindex);
             if (c.equals(newHead)) {
+            	sounds.play(explosionSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 setMode(LOSE);
                 return;
             }
@@ -577,6 +594,7 @@ public class SnakeGameView extends TileView {
         	Coordinate c = p.getCoord();
         	PowerupType t = p.getPowerup();
         	if (c.equals(newHead)) {
+        		sounds.play(powerupSound, 1.0f, 1.0f, 0, 0, 1.5f);
         		mPowerupList.remove(p);
         		switch(t.ordinal()) {
         		case(0): // slower
@@ -602,6 +620,7 @@ public class SnakeGameView extends TileView {
         for (int appleindex = 0; appleindex < applecount; appleindex++) {
             Coordinate c = mAppleList.get(appleindex);
             if (c.equals(newHead)) {
+            	sounds.play(powerupSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 mAppleList.remove(c);
                 mScore++;
                 mScoreView.setText(mScore+"");

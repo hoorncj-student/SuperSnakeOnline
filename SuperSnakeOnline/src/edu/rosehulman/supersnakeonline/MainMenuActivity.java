@@ -6,6 +6,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.view.Menu;
@@ -26,7 +28,11 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 	public static int COLOR_YELLOW = 1;
 	public static int COLOR_RED = 2;
 	private boolean mIsBound = false;
-	private SnakeMusic mServ;
+	public static SnakeMusic mServ;
+	
+    // sounds
+    private SoundPool sounds;
+    private int buttonSound;
 	
 	private ServiceConnection conn = new ServiceConnection() {
 		
@@ -62,6 +68,10 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main_menu);
 		
+		// button sound
+    	sounds = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+    	buttonSound = sounds.load(this, R.raw.button, 1);
+		
 		// background music
 		Intent music = new Intent();
 		doBindService(music);
@@ -85,34 +95,48 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 	public void onClick(View v) {
 		switch(v.getId()) {
 		case R.id.one_player_button:
+			sounds.play(buttonSound, 1.0f, 1.0f, 0, 0, 1.5f);
 			Intent onePlayerIntent = new Intent(this, Snake.class);
 			//onPlayerIntent.putExtra(KEY_NUM_BUTTONS, mNumButtons);
 			startActivity(onePlayerIntent);
 			break;
 		case R.id.two_player_button:
+			sounds.play(buttonSound, 1.0f, 1.0f, 0, 0, 1.5f);
 			Intent twoPlayerIntent = new Intent(this, OnlineLobbyActivity.class);
 			//onPlayerIntent.putExtra(KEY_NUM_BUTTONS, mNumButtons);
 			startActivity(twoPlayerIntent);
 			break;
 		case R.id.settings_button:
+			sounds.play(buttonSound, 1.0f, 1.0f, 0, 0, 1.5f);
 			Intent settingsIntent = new Intent(this, SettingsActivity.class);
 			//onPlayerIntent.putExtra(KEY_NUM_BUTTONS, mNumButtons);
 			startActivity(settingsIntent);
 			break;
 		case R.id.high_scores_button:
+			sounds.play(buttonSound, 1.0f, 1.0f, 0, 0, 1.5f);
 			Intent highScoresIntent = new Intent(this, HighScoresActivity.class);
 			//onPlayerIntent.putExtra(KEY_NUM_BUTTONS, mNumButtons);
 			startActivity(highScoresIntent);
 			break;
 		default:
-			//do nothing
+			// nothing
 			break;
 		}
 	}
 	
 	@Override
+	protected void onStop() {
+		mServ.pauseMusic();
+		super.onStop();
+	}
+	
+	@Override
+	protected void onRestart() {
+		mServ.resumeMusic();
+		super.onRestart();
+	}
+	
 	protected void onDestroy() {
-		mServ.stopMusic();
 		doUnbindService();
 		super.onDestroy();
 	}
