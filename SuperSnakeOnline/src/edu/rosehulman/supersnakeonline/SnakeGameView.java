@@ -402,7 +402,7 @@ public class SnakeGameView extends TileView {
         if (newMode == PAUSE) {
            // mArrowsView.setVisibility(View.GONE);
            // mBackgroundView.setVisibility(View.GONE);
-           str = res.getText(R.string.mode_pause);
+           //str = res.getText(R.string.mode_pause);
         }
         if (newMode == READY) {
            // mArrowsView.setVisibility(View.GONE);
@@ -543,7 +543,7 @@ public class SnakeGameView extends TileView {
     private void updatePortal() {
         if ((mScore % numPointsToLevel == 0 && mScore != 0) && !this.portalCreated) {
         	sounds.play(portalCreateSound, 1.0f, 1.0f, 0, 0, 1.5f);
-            this.x = 2+level+RNG.nextInt(mXTileCount-3-level);
+            this.x = 2+level+RNG.nextInt(mXTileCount-3-level); 
         	this.y = 2+level+RNG.nextInt(mYTileCount-3-level);
         	setTile(PORTAL, this.x, this.y);
         	this.portalCreated  = true;
@@ -558,6 +558,11 @@ public class SnakeGameView extends TileView {
      * in order to simulate motion. If we want to grow him, we don't subtract from the rear.
      */
     private void updateSnake() {
+    	if (mSnakeTrail.size() == 0) {
+    		setMode(LOSE);
+    		return;
+    	}
+    	
         boolean growSnake = false;
 
         // Grab the snake by the head

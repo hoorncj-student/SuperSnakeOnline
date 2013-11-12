@@ -9,24 +9,14 @@
     android:background="@color/greenstuff"
     tools:context=".MainMenuActivity" >
     
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/one_player_button"
-        android:layout_margin="50dp"
-        android:text="@string/app_name"
-        android:gravity="center"
-        android:textSize="72sp" />
-    
     <Button
         android:id="@+id/one_player_button"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:layout_margin="15dp"
-        android:textSize="40sp"
+        android:layout_margin="5dp"
+        android:textSize="35sp"
         android:text="@string/single_player_button" />
 
     <Button
@@ -35,8 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/one_player_button"
-        android:layout_margin="15dp"
-        android:textSize="40sp"
+        android:layout_margin="5dp"
+        android:textSize="35sp"
         android:text="@string/two_player_button" />
 
     <Button
@@ -45,8 +35,8 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/two_player_button"
-        android:layout_margin="15dp"
-        android:textSize="40sp"
+        android:layout_margin="5dp"
+        android:textSize="35sp"
         android:text="@string/high_scores_button" />
 
     <Button
@@ -55,8 +45,19 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/high_scores_button"
-        android:layout_margin="15dp"
-        android:textSize="40sp"
+        android:layout_margin="5dp"
+        android:textSize="35sp"
         android:text="@string/settings_button" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="5dp"
+        android:gravity="center"
+        android:text="@string/app_name"
+        android:textSize="50sp" />
 
 </RelativeLayout>
