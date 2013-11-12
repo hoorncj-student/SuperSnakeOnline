@@ -21,25 +21,16 @@
     android:layout_height="match_parent" >
 
     <!-- SIGN-IN SCREEN -->
-    <LinearLayout android:id="@+id/screen_sign_in" style="@style/LLScreen">
+    <LinearLayout android:id="@+id/screen_sign_in" style="@style/LLScreen" android:background="@color/greenstuff">
         <TextView style="@style/GameTitle" />
         <TextView style="@style/GameBlurb" />
-
-        <Button android:id="@+id/button_single_player"
-            style="@style/MainScreenButton"
-            android:text="@string/single_player" />
         <com.google.android.gms.common.SignInButton android:id="@+id/button_sign_in"
             style="@style/SignInButton" />
     </LinearLayout>
 
     <!-- MAIN SCREEN -->
-    <LinearLayout android:id="@+id/screen_main" style="@style/LLScreen">
+    <LinearLayout android:id="@+id/screen_main" style="@style/LLScreen" android:background="@color/greenstuff">
         <TextView style="@style/GameTitle" />
-        <Button android:id="@+id/button_single_player_2"
-            style="@style/MainScreenButton"
-            android:text="@string/single_player" />
-        <TextView style="@style/MainScreenButtonBlurb"
-            android:text="@string/single_player_explanation" />
         <Button android:id="@+id/button_quick_game"
             style="@style/MainScreenButton"
             android:text="@string/quick_game" />
@@ -61,7 +52,7 @@
     </LinearLayout>
 
     <!-- INVITATION POPUP -->
-    <LinearLayout android:id="@+id/invitation_popup" style="@style/InvPopup">
+    <LinearLayout android:id="@+id/invitation_popup" style="@style/InvPopup" android:background="@color/greenstuff">
         <TextView android:id="@+id/incoming_invitation_text" style="@style/InvPopupText" />
         <Button android:id="@+id/button_accept_popup_invitation"
             style="@style/InvPopupButton"
@@ -69,27 +60,8 @@
     </LinearLayout>
 
     <!-- "PLEASE WAIT" SCREEN -->
-    <LinearLayout android:id="@+id/screen_wait" style="@style/LLScreen">
+    <LinearLayout android:id="@+id/screen_wait" style="@style/LLScreen" android:background="@color/greenstuff">
         <TextView style="@style/Blurb" android:text="@string/please_wait" />
-    </LinearLayout>
-
-    <!-- GAMEPLAY SCREEN -->
-    <LinearLayout android:id="@+id/screen_game" style="@style/LLScreen">
-        <TextView android:id="@+id/instructions"
-            style="@style/Instructions" android:text="@string/instructions" />
-        <TextView android:id="@+id/my_score" style="@style/ScoreDisplay" />
-        <Button android:id="@+id/button_click_me"
-                style="@style/GameButton"
-                android:text="@string/click_me"
-                android:layout_marginBottom="20dp" />
-        <TextView android:id="@+id/countdown" style="@style/FigureLabel" />
-
-        <LinearLayout style="@style/ScoresBox">
-            <TextView android:id="@+id/score0" style="@style/ScoreText" />
-            <TextView android:id="@+id/score1" style="@style/ScoreText" />
-            <TextView android:id="@+id/score2" style="@style/ScoreText" />
-            <TextView android:id="@+id/score3" style="@style/ScoreText" />
-        </LinearLayout>
     </LinearLayout>
     
     <!--  SNAKE SCREEN -->
@@ -106,6 +78,21 @@
 		    android:layout_height="match_parent"
 		    android:layout_margin="20dp"
 		    app:tileSize="24dp"/>
+	    
+	    <TextView android:id="@+id/countdown" 
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentTop="true"
+	        android:layout_centerHorizontal="true"/>
+	    
+	    <TextView android:id="@+id/status_text"
+		  	android:layout_width="match_parent"
+		    android:layout_height="match_parent"
+		    android:layout_gravity="center"
+		    android:gravity="center"
+		    android:textColor="@color/text_violet"
+		    android:textSize="24sp"
+		    android:visibility="visible" />
 	    
 	    <TextView 
 	        android:id="@+id/score_text"
@@ -135,13 +122,63 @@
 	    tools:context=".SnakeGameActivity" >
 	    
 	    <TextView 
-	        android:id="@+id/score_text"
-	        android:layout_alignParentTop="true"
+	        android:id="@+id/high_score_text"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
 	        android:layout_centerHorizontal="true"
-	        android:textSize="20sp"
+	        android:layout_above="@+id/low_score_text"
+	        android:layout_margin="20dp"
+	        android:textSize="40sp"
 	        android:text="0"/>
+	    
+	    <TextView 
+	        android:id="@+id/low_score_text"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerHorizontal="true"
+	        android:layout_above="@+id/end_message"
+	        android:layout_margin="20dp"
+	        android:textSize="40sp"
+	        android:text="0"/>
+	    
+	    <TextView 
+	        android:id="@+id/end_message"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_centerHorizontal="true"
+	        android:layout_centerVertical="true"
+	        android:layout_margin="20dp"
+	        android:textSize="46sp"
+	        android:text="0"/>
+	    
+	    <TextView
+	        android:id="@+id/chat_box"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:background="@color/white"
+	        android:textSize="20sp"
+	        android:text=""
+	        android:layout_below="@+id/end_message"/>
+	    
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_below="@+id/chat_box"
+	        android:orientation="horizontal">
+	        
+		    <EditText
+		        android:id="@+id/chat_entry"
+		        android:layout_height="wrap_content"
+		        android:layout_width="0dp"
+		        android:hint="Type to chat"
+		        android:layout_weight="4"/>
+		    <Button
+		        android:id="@+id/chat_submit"
+		        android:layout_height="wrap_content"
+		        android:layout_width="0dp"
+		        android:layout_weight="1"
+		        android:text="Submit"/>
+		</LinearLayout>
 
 	</RelativeLayout>
 	

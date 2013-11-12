@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View.OnTouchListener;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.games.GamesActivityResultCodes;
@@ -124,7 +125,9 @@ public class MultiplayerActivity extends BaseGameActivity
             findViewById(id).setOnClickListener(this);
         }
         mSnakeView = (SnakeGameView) findViewById(R.id.snake);
+        mSnakeView.setMultiplayer(true);
         mSnakeView.setScoreView(findViewById(R.id.score_text));
+        mSnakeView.setStatusText(findViewById(R.id.status_text));
         mSnakeView.setOpponentScoreView(findViewById(R.id.opponent_score_text));
     }
 
@@ -166,11 +169,6 @@ public class MultiplayerActivity extends BaseGameActivity
         Intent intent;
 
         switch (v.getId()) {
-            case R.id.button_single_player:
-            case R.id.button_single_player_2:
-                resetGameVars();
-                startGame(false);
-                break;
             case R.id.button_sign_in:
                 // user wants to sign in
                 if (!verifyPlaceholderIdsReplaced()) {
@@ -206,6 +204,10 @@ public class MultiplayerActivity extends BaseGameActivity
                 // user wants to play against a random opponent right now
                 startQuickGame();
                 break;
+            case R.id.chat_submit:
+            	// user wants to send a chat message
+            	sendChatItem();
+            	break;
         }
     }
 
@@ -368,7 +370,7 @@ public class MultiplayerActivity extends BaseGameActivity
     // Handle back key to make sure we cleanly leave a game if we are in the middle of one
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent e) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && mCurScreen == R.id.screen_game) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && mCurScreen == R.id.screen_end) {
             leaveRoom();
             return true;
         }
@@ -588,13 +590,17 @@ public class MultiplayerActivity extends BaseGameActivity
     /*
      * GAME LOGIC SECTION. Methods that implement the game's rules.
      */
+    
+ // Current state of the game:
+    int mSecondsLeft = -1; // how long until the game ends (seconds)
+    final static int GAME_DURATION = 10; // game duration, seconds.
+    String mChatText = "";
 
-    // Current state of the game:
-
-    // Reset game variables in preparation for a new game.
+ // Reset game variables in preparation for a new game.
     void resetGameVars() {
         mParticipantScore = 0;
         participantFinished = false;
+        mSecondsLeft = GAME_DURATION;
     }
 
     // Start the gameplay phase of the game.
@@ -609,8 +615,8 @@ public class MultiplayerActivity extends BaseGameActivity
         h.postDelayed(new Runnable() {
             @Override
             public void run() {
-                /*if (mSecondsLeft <= 0)
-                    return;*/
+                if (mSecondsLeft <= 0)
+                    return;
                 gameTick();
                 h.postDelayed(this, 1000);
             }
@@ -618,11 +624,63 @@ public class MultiplayerActivity extends BaseGameActivity
     }
     
     void gameTick(){
-    	if(mSnakeView.getMode() == SnakeGameView.LOSE){
-    		broadcastScore(true);
-    	}else{
-    		broadcastScore(false);
+    	if (mSecondsLeft > 0){
+            --mSecondsLeft;
+            broadcastScore(false);
     	}
+
+        // update countdown
+        ((TextView) findViewById(R.id.countdown)).setText("0:" +
+                (mSecondsLeft < 10 ? "0" : "") + String.valueOf(mSecondsLeft));
+
+        if (mSecondsLeft <= 0) {
+            broadcastScore(true);
+            switchToScreen(R.id.screen_end);
+            setupEndScreen();
+        }
+    }
+    
+    public void setupEndScreen(){
+    	long myScore = mSnakeView.getScore();
+    	if(myScore < mParticipantScore){
+    		((TextView)findViewById(R.id.high_score_text)).setText(mOpponent.getDisplayName()+" - "+mParticipantScore);
+    		((TextView)findViewById(R.id.low_score_text)).setText("Me - "+myScore);
+    		((TextView)findViewById(R.id.end_message)).setText(getString(R.string.loser));
+    	}else if(myScore > mParticipantScore){
+    		((TextView)findViewById(R.id.low_score_text)).setText(mOpponent.getDisplayName()+" - "+mParticipantScore);
+    		((TextView)findViewById(R.id.high_score_text)).setText("Me - "+myScore);
+    		((TextView)findViewById(R.id.end_message)).setText(getString(R.string.winner));
+    	}else{
+    		((TextView)findViewById(R.id.low_score_text)).setText(mOpponent.getDisplayName()+" - "+mParticipantScore);
+    		((TextView)findViewById(R.id.high_score_text)).setText("Me - "+myScore);
+    		((TextView)findViewById(R.id.end_message)).setText(getString(R.string.draw));
+    	}
+    	mChatText = "";
+    	updateChatWindow();
+    	((EditText)findViewById(R.id.chat_entry)).setText("");
+    }
+    
+    public void sendChatItem(){
+    	String enteredText = ""+((EditText)findViewById(R.id.chat_entry)).getText();
+    	mChatText += "me - "+enteredText+"\n";
+    	
+    	mMsgBuf[0] = (byte) 'B';
+		mMsgBuf[1] = (byte) 'O';
+		getGamesClient().sendUnreliableRealTimeMessage(mMsgBuf, mRoomId, mOpponent.getParticipantId());
+    	for(int letter=0;letter<enteredText.length();letter++){
+    		mMsgBuf[0] = (byte) 'C';
+    		mMsgBuf[1] = (byte) enteredText.charAt(letter);
+    		getGamesClient().sendUnreliableRealTimeMessage(mMsgBuf, mRoomId, mOpponent.getParticipantId());
+    	}
+    	mMsgBuf[0] = (byte) 'E';
+		mMsgBuf[1] = (byte) 'O';
+		getGamesClient().sendUnreliableRealTimeMessage(mMsgBuf, mRoomId, mOpponent.getParticipantId());
+    	updateChatWindow();
+    	((EditText)findViewById(R.id.chat_entry)).setText("");
+    }
+    
+    public void updateChatWindow(){
+    	((TextView)findViewById(R.id.chat_box)).setText(mChatText);
     }
 
     /*
@@ -680,6 +738,14 @@ public class MultiplayerActivity extends BaseGameActivity
             Log.d(TAG, "Starting game because we got a start message.");
             dismissWaitingRoom();
             startGame(true);
+        } else if (buf[0] == 'C'){
+        	//Someone is sending a chat item
+        	mChatText = mChatText+((char)buf[1]+"");
+        } else if (buf[0] == 'E'){
+        	mChatText += "\n";
+        	updateChatWindow();
+        } else if (buf[0] == 'B'){
+        	mChatText += mOpponent.getDisplayName()+" - ";
         }
     }
 
@@ -732,13 +798,12 @@ public class MultiplayerActivity extends BaseGameActivity
     final static int[] CLICKABLES = {
             R.id.button_accept_popup_invitation, R.id.button_invite_players,
             R.id.button_quick_game, R.id.button_see_invitations, R.id.button_sign_in,
-            R.id.button_sign_out, R.id.button_click_me, R.id.button_single_player,
-            R.id.button_single_player_2
+            R.id.button_sign_out, R.id.chat_submit
     };
 
     // This array lists all the individual screens our game has.
     final static int[] SCREENS = {
-            R.id.screen_game, R.id.screen_main, R.id.screen_sign_in,
+            R.id.screen_end, R.id.screen_main, R.id.screen_sign_in,
             R.id.screen_wait, R.id.screen_snake
     };
     int mCurScreen = -1;
@@ -759,8 +824,8 @@ public class MultiplayerActivity extends BaseGameActivity
             // if in multiplayer, only show invitation on main screen
             showInvPopup = (mCurScreen == R.id.screen_main);
         } else {
-            // single-player: show on main screen and gameplay screen
-            showInvPopup = (mCurScreen == R.id.screen_main || mCurScreen == R.id.screen_game);
+            // single-player: show on main screen
+            showInvPopup = (mCurScreen == R.id.screen_main);
         }
         findViewById(R.id.invitation_popup).setVisibility(showInvPopup ? View.VISIBLE : View.GONE);
     }

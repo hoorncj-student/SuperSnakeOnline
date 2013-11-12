@@ -50,10 +50,6 @@
             android:label="@string/title_activity_high_scores" >
         </activity>
         <activity
-            android:name="edu.rosehulman.supersnakeonline.OnlineLobbyActivity"
-            android:label="@string/title_activity_online_lobby" >
-        </activity>
-        <activity
             android:name="edu.rosehulman.supersnakeonline.MultiplayerActivity"
             android:label="@string/title_activity_multiplayer" >
         </activity>

@@ -177,6 +177,10 @@ public class SnakeGameView extends TileView {
         loadTile(SHORTEN_STAR, r.getDrawable(R.drawable.shorten));
         loadTile(PORTAL, r.getDrawable(R.drawable.portal));
     }
+    
+    public void setMultiplayer(boolean multiplayer){
+    	isMultiplayer = multiplayer;
+    }
  
     public void initNewGame() {
         mSnakeTrail.clear();
@@ -596,7 +600,7 @@ public class SnakeGameView extends TileView {
     		sounds.play(portalSound, 1.0f, 1.0f, 0, 0, 1.5f);
     		level++;
     		mScore++;
-    		mScoreView.setText(mScore+"");
+    		mScoreView.setText(mScore+"-me");
     		initTransitionGame();
     		update();
     	} 

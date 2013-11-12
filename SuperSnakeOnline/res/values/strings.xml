@@ -38,8 +38,8 @@
     <string name="gamehelper_unknown_error">Unknown error.</string>
     <string name="signing_in">Signing in with Google</string>
     <string name="signing_out">Signing out</string>
-    <string name="game_title">Button Clicker 2000!</string>
-    <string name="game_blurb">A sample game that tests your ability to click a button. Can you click faster than your friends? Only one way to find out! To play this game with friends, you must sign in with Google.</string>
+    <string name="game_title">Super Snake Multiplayer</string>
+    <string name="game_blurb">Sign into google plus to play</string>
     <string name="single_player">Single Player</string>
     <string name="single_player_explanation">Get some practice!</string>
     <string name="quick_game">Quick game</string>
@@ -61,5 +61,8 @@
     <string name="is_inviting_you">is challenging you to a game!</string>
     <string name="title_activity_multiplayer">MultiplayerActivity</string>
     <string name="zero">0</string>
+    <string name="loser">Sorry, you lost.</string>
+    <string name="winner">Congratulations, you won!</string>
+    <string name="draw">Tie game</string>
 
 </resources>
