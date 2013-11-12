@@ -52,23 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Button Clicker 2000. A minimalistic game showing the multiplayer features of
- * the Google Play game services API. The objective of this game is clicking a
- * button. Whoever clicks the button the most times within a 20 second interval
- * wins. It's that simple. This game can be played with 2, 3 or 4 players. The
- * code is organized in sections in order to make understanding as clear as
- * possible. We start with the integration section where we show how the game
- * is integrated with the Google Play game services API, then move on to
- * game-specific UI and logic. INSTRUCTIONS: To run this sample, please set up
- * a project in the Developer Console. Then, place your app ID on
- * res/values/ids.xml. Also, change the package name to the package name you
- * used to create the client ID in Developer Console. Make sure you sign the
- * APK with the certificate whose fingerprint you entered in Developer Console
- * when creating your Client Id.
- *
- * @author Bruno Oliveira (btco), 2013-04-26
- */
+
 public class MultiplayerActivity extends BaseGameActivity
         implements View.OnClickListener, RealTimeMessageReceivedListener,
         RoomStatusUpdateListener, RoomUpdateListener, OnInvitationReceivedListener {
@@ -80,7 +64,7 @@ public class MultiplayerActivity extends BaseGameActivity
 
     // Debug tag
     final static boolean ENABLE_DEBUG = true;
-    final static String TAG = "ButtonClicker2000";
+    final static String TAG = "SuperSnakeOnline";
 
     // Request codes for the UIs that we show with startActivityForResult:
     final static int RC_SELECT_PLAYERS = 10000;
@@ -127,7 +111,7 @@ public class MultiplayerActivity extends BaseGameActivity
         mSnakeView = (SnakeGameView) findViewById(R.id.snake);
         mSnakeView.setMultiplayer(true);
         mSnakeView.setScoreView(findViewById(R.id.score_text));
-        mSnakeView.setStatusText(findViewById(R.id.status_text));
+        mSnakeView.setStatusView(findViewById(R.id.status_text));
         mSnakeView.setOpponentScoreView(findViewById(R.id.opponent_score_text));
     }
 
@@ -593,7 +577,7 @@ public class MultiplayerActivity extends BaseGameActivity
     
  // Current state of the game:
     int mSecondsLeft = -1; // how long until the game ends (seconds)
-    final static int GAME_DURATION = 10; // game duration, seconds.
+    final static int GAME_DURATION = 30; // game duration, seconds.
     String mChatText = "";
 
  // Reset game variables in preparation for a new game.
@@ -607,37 +591,10 @@ public class MultiplayerActivity extends BaseGameActivity
     void startGame(boolean multiplayer) {
         mMultiplayer = multiplayer;
         broadcastScore(false);
-        
+        mSnakeView.setMultiplayer(multiplayer);
         createSnakeGame();
 
         // run the gameTick() method every second to update the game.
-        final Handler h = new Handler();
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (mSecondsLeft <= 0)
-                    return;
-                gameTick();
-                h.postDelayed(this, 1000);
-            }
-        }, 1000);
-    }
-    
-    void gameTick(){
-    	if (mSecondsLeft > 0){
-            --mSecondsLeft;
-            broadcastScore(false);
-    	}
-
-        // update countdown
-        ((TextView) findViewById(R.id.countdown)).setText("0:" +
-                (mSecondsLeft < 10 ? "0" : "") + String.valueOf(mSecondsLeft));
-
-        if (mSecondsLeft <= 0) {
-            broadcastScore(true);
-            switchToScreen(R.id.screen_end);
-            setupEndScreen();
-        }
     }
     
     public void setupEndScreen(){
@@ -712,7 +669,7 @@ public class MultiplayerActivity extends BaseGameActivity
             // score update.
         	int existingScore = mParticipantScore != 0 ? mParticipantScore : 0;
             int thisScore = (int) buf[1];
-            if (thisScore > existingScore) {
+            /*if (thisScore > existingScore) {
                 // this check is necessary because packets may arrive out of
                 // order, so we
                 // should only ever consider the highest score we received, as
@@ -721,7 +678,8 @@ public class MultiplayerActivity extends BaseGameActivity
                 // lose points,
                 // we'd have to add a "serial number" to the packet.
             	mParticipantScore = thisScore;
-            }
+            }*/
+            mParticipantScore = thisScore;
 
             // update the scores on the screen
             updatePeerScoresDisplay();
@@ -746,6 +704,9 @@ public class MultiplayerActivity extends BaseGameActivity
         	updateChatWindow();
         } else if (buf[0] == 'B'){
         	mChatText += mOpponent.getDisplayName()+" - ";
+        } else if (buf[0] == 'G'){
+        	//Countdown is starting
+        	startCountdown();
         }
     }
 
@@ -907,6 +868,8 @@ public class MultiplayerActivity extends BaseGameActivity
 
     private SnakeGameView mSnakeView;
     private GestureDetector mGestureDetector;
+    private int COUNTDOWN_LENGTH = 3;
+    private int countdownSeconds;
 	
 	
     public void createSnakeGame() {
@@ -947,29 +910,92 @@ public class MultiplayerActivity extends BaseGameActivity
                     // Direction is same as the quadrant which was clicked
                     mSnakeView.moveSnake(direction);
 
-                } /*else if (mSnakeView.getGameState() != SnakeGameView.RUNNING) {
+                }else if (mSnakeView.getGameState() == SnakeGameView.READY) {
                     // If the game is not running then on touching any part of the screen
                     // we start the game by sending MOVE_UP signal to SnakeGameView
-                    mSnakeView.moveSnake(MOVE_UP);
-                }*/
+                    //mSnakeView.moveSnake(MOVE_UP);
+                	signalStart();
+                }else if (mSnakeView.getGameState() == SnakeGameView.LOSE){
+                	mSnakeView.moveSnake(MOVE_UP);
+                }
                 return false;
             }
         });
-        mSnakeView.moveSnake(MOVE_UP);
     }
+    
+    public void signalStart(){
+    	startCountdown();
+    	mMsgBuf[0] = (byte) 'G';
+		mMsgBuf[1] = (byte) 'O';
+		getGamesClient().sendUnreliableRealTimeMessage(mMsgBuf, mRoomId, mOpponent.getParticipantId());
+    }
+    
+    public void startCountdown(){
+    	countdownSeconds = COUNTDOWN_LENGTH;
+    	final Handler h = new Handler();
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (countdownSeconds <= 0){
+                	go();
+                	mSnakeView.moveSnake(MOVE_UP);
+                    return;
+                }
+                count();
+                h.postDelayed(this, 1000);
+            }
+        }, 1000);
+    }
+    
+    public void count(){
+    	mSnakeView.setStatusText(""+countdownSeconds);
+    	countdownSeconds--;
+    }
+    
+    public void go(){
+    	final Handler h = new Handler();
+        h.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (mSecondsLeft <= 0)
+                    return;
+                gameTick();
+                h.postDelayed(this, 1000);
+            }
+        }, 1000);
+    }
+    
+    void gameTick(){
+    	if (mSecondsLeft > 0){
+            --mSecondsLeft;
+            broadcastScore(false);
+    	}
 
-    @Override
+        // update countdown
+        ((TextView) findViewById(R.id.countdown)).setText((mSecondsLeft/60) + ":" +
+                (mSecondsLeft%60 < 10 ? "0" : "") + String.valueOf(mSecondsLeft%60));
+
+        if (mSecondsLeft <= 0) {
+            broadcastScore(true);
+            switchToScreen(R.id.screen_end);
+            mSnakeView.setMode(SnakeGameView.LOSE);
+            setupEndScreen();
+        }
+    }
+    
+
+    /*@Override
     protected void onPause() {
         super.onPause();
         // Pause the game along with the activity
         mSnakeView.setMode(SnakeGameView.PAUSE);
-    }
+    }*/
 
-    @Override
+    /*@Override
     public void onSaveInstanceState(Bundle outState) {
         // Store the game state
         outState.putBundle(ICICLE_KEY, mSnakeView.saveState());
-    }
+    }*/
 
     private class MyGestureDetector extends SimpleOnGestureListener {
         // PART E

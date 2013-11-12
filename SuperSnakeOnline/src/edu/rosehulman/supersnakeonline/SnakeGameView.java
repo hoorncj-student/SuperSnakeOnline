@@ -182,11 +182,12 @@ public class SnakeGameView extends TileView {
     	isMultiplayer = multiplayer;
     }
  
-    public void initNewGame() {
+    public void initNewGame(boolean alive) {
         mSnakeTrail.clear();
         mAppleList.clear();
         mPowerupList.clear();
         mPowerupSpawnList.clear();
+        this.portalCreated = false;
         
 
         mSnakeTrail.add(new Coordinate(7, 8));
@@ -196,8 +197,12 @@ public class SnakeGameView extends TileView {
         //mSnakeTrail.add(new Coordinate(3, 8));
         //mSnakeTrail.add(new Coordinate(2, 8));
         mNextDirection = NORTH;
-
-        mScore = 0;
+        
+        if(!alive){
+        	mScore = 0;
+        	level = 0;
+        }
+        mScoreView.setText("Me - "+mScore);
         addRandomApple();
     }
     
@@ -333,7 +338,7 @@ public class SnakeGameView extends TileView {
                  * At the beginning of the game, or the end of a previous one,
                  * we should start a new game if UP key is clicked.
                  */
-                initNewGame();
+                initNewGame(mMode == LOSE && isMultiplayer);
                 setMode(RUNNING);
                 update();
                 return;
@@ -552,6 +557,13 @@ public class SnakeGameView extends TileView {
         }
     }
     
+    public void makeLose(){
+    	setMode(LOSE);
+		if(isMultiplayer){
+      	  mScore /= 2;
+        }
+    }
+    
     /**
      * Figure out which way the snake is going, see if he's run into anything (the walls, himself,
      * or an apple). If he's not going to die, we then add to the front and subtract from the rear
@@ -559,7 +571,7 @@ public class SnakeGameView extends TileView {
      */
     private void updateSnake() {
     	if (mSnakeTrail.size() == 0) {
-    		setMode(LOSE);
+    		makeLose();
     		return;
     	}
     	
@@ -595,7 +607,7 @@ public class SnakeGameView extends TileView {
         if ((newHead.x < 1+level) || (newHead.y < 1+level) || (newHead.x > mXTileCount - (2+level))
                 || (newHead.y > mYTileCount - (2+level))) {
         		sounds.play(explosionSound, 1.0f, 1.0f, 0, 0, 1.5f);
-                setMode(LOSE);
+                makeLose();
                 return;
         }
         
@@ -605,7 +617,7 @@ public class SnakeGameView extends TileView {
     		sounds.play(portalSound, 1.0f, 1.0f, 0, 0, 1.5f);
     		level++;
     		mScore++;
-    		mScoreView.setText(mScore+"-me");
+    		mScoreView.setText("Me - "+mScore);
     		initTransitionGame();
     		update();
     	} 
@@ -616,7 +628,7 @@ public class SnakeGameView extends TileView {
             Coordinate c = mSnakeTrail.get(snakeindex);
             if (c.equals(newHead)) {
             	sounds.play(explosionSound, 1.0f, 1.0f, 0, 0, 1.5f);
-                setMode(LOSE);
+                makeLose();
                 return;
             }
         }
@@ -637,7 +649,7 @@ public class SnakeGameView extends TileView {
         		case(1): // apples
         			//addRandomApples();
         			mScore+=3*(level+1);
-        			mScoreView.setText(mScore+"");
+        			mScoreView.setText("Me - "+mScore);
         			break;
         		case(2): // shrink
         			shrinkSnake();
@@ -657,7 +669,7 @@ public class SnakeGameView extends TileView {
             	sounds.play(powerupSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 mAppleList.remove(c);
                 mScore+=1*(level+1);
-                mScoreView.setText(mScore+"");
+                mScoreView.setText("Me - "+mScore);
                 growSnake = true;
                 addRandomApple();
             }
@@ -694,8 +706,8 @@ public class SnakeGameView extends TileView {
         boolean found = false;
         while (!found) {
             // Choose a new location for our apple
-            int newX = 2 + RNG.nextInt(mXTileCount - 3);
-            int newY = 2 + RNG.nextInt(mYTileCount - 3);
+            int newX = 2 + level + RNG.nextInt(mXTileCount - 3 - level);
+            int newY = 2 + level + RNG.nextInt(mYTileCount - 3 - level);
             newCoord = new Coordinate(newX, newY);
 
             // Make sure it's not already under the snake
@@ -763,8 +775,12 @@ public class SnakeGameView extends TileView {
 		mScoreView = (TextView) scoreView;
 	}
 	
-	public void setStatusText(View statusView) {
+	public void setStatusView(View statusView) {
 		mStatusText = (TextView) statusView;
+	}
+	
+	public void setStatusText(String statusText){
+		mStatusText.setText(statusText);
 	}
 	
 	public void setOpponentScoreView(View oppScoreView){

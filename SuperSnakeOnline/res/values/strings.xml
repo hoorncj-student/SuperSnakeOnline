@@ -3,7 +3,7 @@
 
     <string name="mode_pause">Paused</string>
     <string name="mode_ready">Click to start!</string>
-    <string name="mode_lose">You lost!</string>
+    <string name="mode_lose">You died!</string>
     
     <string name="music_on">Music On</string>
     <string name="music_off">Music Off</string>

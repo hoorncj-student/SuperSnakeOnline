@@ -81,7 +81,7 @@ public class Snake extends Activity {
         mSnakeView = (SnakeGameView) findViewById(R.id.snake);
         mSnakeView.setMultiplayer(false);
         mSnakeView.setScoreView(findViewById(R.id.score_text));
-        mSnakeView.setStatusText(findViewById(R.id.status_text));
+        mSnakeView.setStatusView(findViewById(R.id.status_text));
         mSnakeView.setSnakeColor(color);
 		mSnakeView.setDifficulty(difficulty);
 
