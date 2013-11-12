@@ -112,7 +112,7 @@
 	        android:layout_alignParentTop="true"
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"
-	        android:layout_a="true"
+	        android:layout_centerHorizontal="true"
 	        android:textSize="20sp"
 	        android:text="0"/>
 	    
@@ -126,24 +126,4 @@
 	        android:text="0"/>
 
 	</RelativeLayout>
-	
-    <!--  END SCREEN -->
-    <RelativeLayout android:id="@+id/screen_end"
-	    android:layout_width="match_parent"
-	    android:layout_height="match_parent"
-	    android:background="@color/greenstuff"
-	    tools:context=".SnakeGameActivity" >
-	    
-	    <TextView 
-	        android:id="@+id/score_text"
-	        android:layout_alignParentTop="true"
-	        android:layout_width="wrap_content"
-	        android:layout_height="wrap_content"
-	        android:layout_a="true"
-	        android:textSize="20sp"
-	        android:text="0"/>
-
-	</RelativeLayout>
-	
-    
 </FrameLayout>
