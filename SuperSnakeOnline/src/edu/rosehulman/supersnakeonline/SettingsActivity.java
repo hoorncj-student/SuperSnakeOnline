@@ -1,7 +1,9 @@
 package edu.rosehulman.supersnakeonline;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
@@ -18,14 +20,13 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 	private int currentColor;
 	private int currentDifficulty;
 	private Dialog colorDialog;
-	private boolean musicOff;
+	private ToggleButton tButton;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 		SharedPreferences settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE, 0);
-		musicOff = settings.getBoolean(MainMenuActivity.MUSIC_ON, false);
 		String username = settings.getString(MainMenuActivity.USERNAME_FIELD, "Player");
 		if(!username.equals("Player")){
 			settings = getSharedPreferences(MainMenuActivity.PREFERENCES_FILE+"_"+username, 0);
@@ -55,7 +56,11 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 		
 		((ImageButton)findViewById(R.id.color_button)).setOnClickListener(this);
 		
-		((ToggleButton)findViewById(R.id.music_toggle)).setOnCheckedChangeListener(this);
+		tButton = (ToggleButton)findViewById(R.id.music_toggle);
+		if (!isMyServiceRunning()) {
+			tButton.setChecked(true);
+		} 
+		tButton.setOnCheckedChangeListener(this);
 	}
 
 	@Override
@@ -80,7 +85,6 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 	    editor.putString(MainMenuActivity.USERNAME_FIELD, setName);
 	    editor.putInt(MainMenuActivity.COLOR_FIELD, currentColor);
 	    editor.putInt(MainMenuActivity.DIFFICULTY_FIELD, currentDifficulty);
-	    editor.putBoolean(MainMenuActivity.MUSIC_ON, musicOff);
 	    editor.commit();
 	}
 
@@ -136,6 +140,21 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 
 	@Override
 	public void onCheckedChanged(CompoundButton b, boolean checked) {
-		musicOff = checked;
+		tButton.setChecked(checked);
+		if (checked) {
+			stopService(MainMenuActivity.bgMusic);
+		} else {
+			startService(MainMenuActivity.bgMusic);
+		}
+	}
+	
+	private boolean isMyServiceRunning() {
+	    ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+	    for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	        if (BackgroundMusic.class.getName().equals(service.service.getClassName())) {
+	            return true;
+	        }
+	    }
+	    return false;
 	}
 }

@@ -1,6 +1,11 @@
 package edu.rosehulman.supersnakeonline;
 
+import java.util.List;
+
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.Application;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -33,7 +38,7 @@ public class MainMenuActivity extends Activity implements OnClickListener {
     private int buttonSound;
     private boolean mIsBound = false;
     private BackgroundMusic mServ;
-    private Intent bgMusic;
+    protected static Intent bgMusic;
     private ServiceConnection conn = new ServiceConnection() {
     	@Override
 	    public void onServiceConnected(ComponentName name, IBinder
