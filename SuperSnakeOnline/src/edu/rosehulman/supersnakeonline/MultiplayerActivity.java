@@ -1,4 +1,7 @@
-/* Copyright (C) 2013 Google Inc.
+/* 
+ * Updated by Chris Hoorn and Joe Lee. Nov-2013.
+ * 
+ * Copyright (C) 2013 Google Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
