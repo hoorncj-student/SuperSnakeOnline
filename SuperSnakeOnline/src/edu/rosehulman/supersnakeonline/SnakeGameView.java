@@ -1,21 +1,32 @@
 package edu.rosehulman.supersnakeonline;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Random;
 
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.OpenableColumns;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class SnakeGameView extends TileView {
@@ -44,6 +55,11 @@ public class SnakeGameView extends TileView {
     public static final int SOUTH = 2;
     public static final int EAST = 3;
     public static final int WEST = 4;
+
+    /**
+     * Internal storage
+     */
+    public static final String FILENAME = "snake.highscores";
     
     /**
      * Labels for the drawables that will be loaded into the TileView class
@@ -433,11 +449,43 @@ public class SnakeGameView extends TileView {
           //  mArrowsView.setVisibility(View.GONE);
           //  mBackgroundView.setVisibility(View.GONE);
           str = res.getString(R.string.mode_lose, mScore);
+          showAddDialog();
         }
 
         mStatusText.setText(str);
         mStatusText.setVisibility(View.VISIBLE);
     }
+    
+	private void showAddDialog() {
+		final Dialog addDialog = new Dialog(getContext());
+		addDialog.setContentView(R.layout.submit_dialog);
+		addDialog.setTitle(getResources().getString(R.string.mode_lose,mScore));
+		Button cancel = (Button) addDialog.findViewById(R.id.cancel_button);
+		Button ok = (Button) addDialog.findViewById(R.id.ok_button);
+		cancel.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addDialog.dismiss();
+			}
+		});
+		ok.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				String name = ((EditText) addDialog.findViewById(R.id.enter_name)).getText().toString();
+				storeScore(name);
+				addDialog.dismiss();
+			}
+		});
+		addDialog.show();
+	}
+	
+	private void storeScore(String name) {
+		SharedPreferences sp = getContext().getSharedPreferences(MainMenuActivity.PREFERENCES_FILE, 0);
+		SharedPreferences.Editor editor = sp.edit();
+		editor.putString("user:"+name, String.valueOf(mScore));
+		editor.commit();
+		
+	}
     
     /**
      * @return the Game state as Running, Ready, Paused, Lose

@@ -129,8 +129,12 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 	@Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		if (bgMusic != null) {
-			stopService(bgMusic);
-		}
+		stopService(bgMusic);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		stopService(bgMusic);
+		super.onDestroy();
 	}
 }

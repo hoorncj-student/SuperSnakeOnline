@@ -12,10 +12,11 @@
 
     <TextView
         android:id="@+id/high_scores_title"
+        style="@style/GameTitle"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:text="@string/high_scores_title" 
-        android:textSize="72sp"
+        android:textSize="50sp"
         android:gravity="center"
         android:layout_weight=".3"/>
     
@@ -23,7 +24,7 @@
         android:id="@+id/high_scores_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="23dp"
+        android:layout_marginBottom="10dp"
         android:layout_weight="1" >
 
 	</ListView>
