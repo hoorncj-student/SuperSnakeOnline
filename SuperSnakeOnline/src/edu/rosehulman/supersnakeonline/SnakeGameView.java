@@ -56,7 +56,8 @@ public class SnakeGameView extends TileView {
     private static final int FAST_STAR = 6;
     private static final int SLOW_STAR = 7;
     private static final int SHORTEN_STAR = 8;
-    private static final int PORTAL = 9;
+    private static final int WALL_STAR = 9;
+    private static final int PORTAL = 10;
     
     // location of portal
     private int x;
@@ -90,6 +91,8 @@ public class SnakeGameView extends TileView {
     private long mLastPowerTime;
     private long mPowerLife = 10000;
     
+    private boolean mSendingWall = false;
+    
     /**
      * mSnakeTrail: A list of Coordinates that make up the snake's body.
      */
@@ -100,6 +103,8 @@ public class SnakeGameView extends TileView {
      */
     private Queue<Powerup> mPowerupList = new LinkedList<Powerup>();
     private Queue<Long> mPowerupSpawnList = new LinkedList<Long>();
+    
+    private ArrayList<Coordinate> mWallList = new ArrayList<Coordinate>();
     
     /**
      * mAppleList
@@ -129,6 +134,14 @@ public class SnakeGameView extends TileView {
             sendMessageDelayed(obtainMessage(0), delayMillis);
         }
     };
+    
+    public void setSendingWall(boolean wall){
+    	mSendingWall = wall;
+    }
+    
+    public boolean getSendingWall(){
+    	return mSendingWall;
+    }
     
     public int getMode() {
     	return this.mMode;
@@ -166,7 +179,7 @@ public class SnakeGameView extends TileView {
 
         Resources r = this.getContext().getResources();
 
-        resetTiles(10);
+        resetTiles(11);
         loadTile(RED_STAR, r.getDrawable(R.drawable.redstar)); 
         loadTile(YELLOW_STAR, r.getDrawable(R.drawable.yellowstar));
         loadTile(GREEN_STAR, r.getDrawable(R.drawable.greenstar));
@@ -175,6 +188,7 @@ public class SnakeGameView extends TileView {
         loadTile(FAST_STAR, r.getDrawable(R.drawable.speedup));
         loadTile(SLOW_STAR, r.getDrawable(R.drawable.slowdown));
         loadTile(SHORTEN_STAR, r.getDrawable(R.drawable.shorten));
+        loadTile(WALL_STAR, r.getDrawable(R.drawable.wallstar));
         loadTile(PORTAL, r.getDrawable(R.drawable.portal));
     }
     
@@ -492,7 +506,8 @@ public class SnakeGameView extends TileView {
             
             newPower.setCoord(newCoord);
         }
-        newPower.setPowerup(PowerupType.values()[RNG.nextInt(4)]);
+        //newPower.setPowerup(PowerupType.values()[RNG.nextInt(5)]);
+        newPower.setPowerup(PowerupType.values()[4]);
         
         if (newCoord == null) {
             Log.e(TAG, "Somehow ended up with a null newCoord!");
@@ -526,6 +541,9 @@ public class SnakeGameView extends TileView {
 			case(3): //speed up
 				setTile(FAST_STAR, c.x, c.y);
 				break;
+			case(4): //wall
+				setTile(WALL_STAR, c.x, c.y);
+				break;
 			}
 		}
 	}
@@ -541,6 +559,9 @@ public class SnakeGameView extends TileView {
         for (int y = 1+level; y < mYTileCount - 1 - level; y++) {
             setTile(GREEN_STAR, 0+level, y);
             setTile(GREEN_STAR, mXTileCount - 1 - level, y);
+        }
+        for(Coordinate c : mWallList){
+        	setTile(GREEN_STAR, c.x, c.y);
         }
     }
     
@@ -611,6 +632,14 @@ public class SnakeGameView extends TileView {
                 return;
         }
         
+        for(Coordinate c : mWallList){
+        	if(c.equals(newHead)){
+        		sounds.play(explosionSound, 1.0f, 1.0f, 0, 0, 1.5f);
+                makeLose();
+                return;
+        	}
+        }
+        
         // portal collision
     	if (this.portalCreated && newHead.x==this.x && newHead.y==this.y) {
     		// go to new map
@@ -656,6 +685,9 @@ public class SnakeGameView extends TileView {
         			break;
         		case(3): // faster
         			mMoveDelay /= 2;
+        			break;
+        		case(4): //wall
+        			mSendingWall = true;
         			break;
         		}
         		break;
@@ -798,5 +830,33 @@ public class SnakeGameView extends TileView {
 			Log.d("CRAP","oppScore");
 		}
 		mOppScoreView.setText(score);
+	}
+	
+	public void generateRandomWall(){
+		Coordinate newCoord = null;
+        boolean found = false;
+        while (!found) {
+            // Choose a new location for our apple
+            int newX = 2 + level + RNG.nextInt(mXTileCount - 3 - level);
+            int newY = 2 + level + RNG.nextInt(mYTileCount - 3 - level);
+            newCoord = new Coordinate(newX, newY);
+
+            // Make sure it's not already under the snake
+            boolean collision = false;
+            int snakelength = mSnakeTrail.size();
+            for (int index = 0; index < snakelength; index++) {
+                if (mSnakeTrail.get(index).equals(newCoord)) {
+                    collision = true;
+                }
+            }
+            // if we're here and there's been no collision, then we have
+            // a good location for a wall. Otherwise, we'll circle back
+            // and try again
+            found = !collision;
+        }
+        if (newCoord == null) {
+            Log.e(TAG, "Somehow ended up with a null newCoord!");
+        }
+        mWallList.add(newCoord);
 	}
 }
