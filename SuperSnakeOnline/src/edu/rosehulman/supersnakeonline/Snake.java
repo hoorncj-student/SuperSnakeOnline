@@ -121,6 +121,10 @@ public class Snake extends Activity {
                 } else if (mSnakeView.getGameState() != SnakeGameView.RUNNING) {
                     // If the game is not running then on touching any part of the screen
                     // we start the game by sending MOVE_UP signal to SnakeGameView
+                	
+                	// countdown text
+                	
+                	
                     mSnakeView.moveSnake(MOVE_UP);
                 }
                 return false;

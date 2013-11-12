@@ -1,12 +1,14 @@
 package edu.rosehulman.supersnakeonline;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,7 +31,34 @@ public class MainMenuActivity extends Activity implements OnClickListener {
     // sounds
     private SoundPool sounds;
     private int buttonSound;
-    //private BackgroundSound mBSound; TODO
+    private boolean mIsBound = false;
+    private BackgroundMusic mServ;
+    private Intent bgMusic;
+    private ServiceConnection conn = new ServiceConnection() {
+    	@Override
+	    public void onServiceConnected(ComponentName name, IBinder
+	     binder) {
+	    	mServ = ((BackgroundMusic.ServiceBinder)binder).getService();
+	    }
+	
+    	@Override
+	    public void onServiceDisconnected(ComponentName name) {
+	        mServ = null;
+	    }
+    };    
+    void doBindService(){
+        bindService(new Intent(this,BackgroundMusic.class),
+        		conn, Context.BIND_AUTO_CREATE);
+        mIsBound = true;
+    }
+    void doUnbindService()
+    {
+        if(mIsBound)
+        {
+            unbindService(conn);
+            mIsBound = false;
+        }
+    }
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +68,11 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 		// button sound
     	sounds = new SoundPool(20, AudioManager.STREAM_MUSIC, 0);
     	buttonSound = sounds.load(this, R.raw.button, 1);
-    	//mBSound = new BackgroundSound();
+
+    	// music
+    	bgMusic = new Intent();
+    	bgMusic.setClass(this, BackgroundMusic.class);
+    	startService(bgMusic);
     	
 		// button handler
 		((Button)findViewById(R.id.one_player_button)).setOnClickListener(this);
@@ -88,30 +121,11 @@ public class MainMenuActivity extends Activity implements OnClickListener {
 		}
 	}
 	
-	/*
 	@Override
-	protected void onStop() {
-		super.onStop();
-		mBSound.cancel(true);
+	public void onBackPressed() {
+		super.onBackPressed();
+		if (bgMusic != null) {
+			stopService(bgMusic);
+		}
 	}
-	
-	@Override
-	protected void onRestart() {
-		super.onRestart();
-		mBSound.execute();
-	}
-	
-	class BackgroundSound extends AsyncTask<Void, Void, Void> {
-	    @Override
-	    protected Void doInBackground(Void... params) {
-	    	if (!SettingsActivity.musicOff) {
-		        MediaPlayer player = MediaPlayer.create(MainMenuActivity.this, R.raw.arab); 
-		        player.setLooping(true); // Set looping 
-		        player.setVolume(100,100); 
-		        player.start(); 
-	    	} 
-
-	        return null;
-	    }
-	}*/
 }

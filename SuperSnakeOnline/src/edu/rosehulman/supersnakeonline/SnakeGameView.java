@@ -580,8 +580,8 @@ public class SnakeGameView extends TileView {
 
         // Collision detection
         // For now we have a 1-square wall around the entire arena
-        if ((newHead.x < 1) || (newHead.y < 1) || (newHead.x > mXTileCount - 2)
-                || (newHead.y > mYTileCount - 2)) {
+        if ((newHead.x < 1+level) || (newHead.y < 1+level) || (newHead.x > mXTileCount - (2+level))
+                || (newHead.y > mYTileCount - (2+level))) {
         		sounds.play(explosionSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 setMode(LOSE);
                 return;
@@ -593,6 +593,7 @@ public class SnakeGameView extends TileView {
     		sounds.play(portalSound, 1.0f, 1.0f, 0, 0, 1.5f);
     		level++;
     		mScore++;
+    		mScoreView.setText(mScore+"");
     		initTransitionGame();
     		update();
     	} 
@@ -623,7 +624,7 @@ public class SnakeGameView extends TileView {
         			break;
         		case(1): // apples
         			//addRandomApples();
-        			mScore+=3;
+        			mScore+=3*(level+1);
         			mScoreView.setText(mScore+"");
         			break;
         		case(2): // shrink
@@ -643,7 +644,7 @@ public class SnakeGameView extends TileView {
             if (c.equals(newHead)) {
             	sounds.play(powerupSound, 1.0f, 1.0f, 0, 0, 1.5f);
                 mAppleList.remove(c);
-                mScore++;
+                mScore+=1*(level+1);
                 mScoreView.setText(mScore+"");
                 growSnake = true;
                 addRandomApple();

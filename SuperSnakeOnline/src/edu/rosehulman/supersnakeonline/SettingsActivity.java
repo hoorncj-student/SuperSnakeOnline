@@ -18,7 +18,7 @@ public class SettingsActivity extends Activity implements OnCheckedChangeListene
 	private int currentColor;
 	private int currentDifficulty;
 	private Dialog colorDialog;
-	public static boolean musicOff = false;
+	private boolean musicOff;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
