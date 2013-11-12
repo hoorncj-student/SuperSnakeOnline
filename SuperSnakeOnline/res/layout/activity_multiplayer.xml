@@ -33,6 +33,7 @@
     <!-- MAIN SCREEN -->
     <LinearLayout android:id="@+id/screen_main" style="@style/LLScreen" android:background="@color/greenstuff">
         <TextView style="@style/GameTitle"
+            android:gravity="center_horizontal"
             android:textSize="50sp" />
         <Button android:id="@+id/button_quick_game"
             style="@style/MainScreenButton"
