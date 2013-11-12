@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * Modified by Chris Hoorn and Joe Lee. Nov-2013.
+ * 
  * Button Clicker 2000. A minimalistic game showing the multiplayer features of
  * the Google Play game services API. The objective of this game is clicking a
  * button. Whoever clicks the button the most times within a 20 second interval
