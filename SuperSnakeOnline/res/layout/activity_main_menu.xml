@@ -11,6 +11,7 @@
     
     <Button
         android:id="@+id/one_player_button"
+        style="@style/MainScreenButton"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -21,6 +22,7 @@
 
     <Button
         android:id="@+id/two_player_button"
+        style="@style/MainScreenButton"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -31,6 +33,7 @@
 
     <Button
         android:id="@+id/high_scores_button"
+        style="@style/MainScreenButton"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -41,6 +44,7 @@
 
     <Button
         android:id="@+id/settings_button"
+        style="@style/MainScreenButton"
         android:layout_width="400dp"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -51,11 +55,12 @@
 
     <TextView
         android:id="@+id/title"
+        style="@style/GameTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_margin="5dp"
+        android:layout_margin="10dp"
         android:gravity="center"
         android:text="@string/app_name"
         android:textSize="50sp" />

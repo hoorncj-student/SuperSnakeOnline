@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--  Modified by Joe Lee and Chris Hoorn. Nov-2013. -->
+
 <!--
    Copyright (C) 2013 Google Inc.
 
@@ -30,24 +32,40 @@
 
     <!-- MAIN SCREEN -->
     <LinearLayout android:id="@+id/screen_main" style="@style/LLScreen" android:background="@color/greenstuff">
-        <TextView style="@style/GameTitle" />
+        <TextView style="@style/GameTitle"
+            android:textSize="50sp" />
         <Button android:id="@+id/button_quick_game"
             style="@style/MainScreenButton"
+            android:layout_width="400dp"
+	        android:layout_margin="5dp"
+	        android:textSize="35sp"
             android:text="@string/quick_game" />
         <TextView style="@style/MainScreenButtonBlurb"
+            android:textSize="35sp"
             android:text="@string/quick_game_explanation" />
         <Button android:id="@+id/button_invite_players"
             style="@style/MainScreenButton"
+            android:layout_width="400dp"
+	        android:layout_margin="5dp"
+	        android:textSize="35sp"
             android:text="@string/invite_players" />
         <TextView style="@style/MainScreenButtonBlurb"
+            android:textSize="35sp"
             android:text="@string/invite_players_explanation" />
         <Button android:id="@+id/button_see_invitations"
             style="@style/MainScreenButton"
+            android:layout_width="400dp"
+	        android:layout_margin="5dp"
+	        android:textSize="35sp"
             android:text="@string/see_invitations" />
         <TextView style="@style/MainScreenButtonBlurb"
+            android:textSize="35sp"
             android:text="@string/see_invitations_explanation" />
         <Button android:id="@+id/button_sign_out"
             style="@style/SignOutButton"
+            android:layout_width="400dp"
+	        android:layout_margin="5dp"
+	        android:textSize="35sp"
             android:text="@string/sign_out" />
     </LinearLayout>
 
@@ -61,7 +79,7 @@
 
     <!-- "PLEASE WAIT" SCREEN -->
     <LinearLayout android:id="@+id/screen_wait" style="@style/LLScreen" android:background="@color/greenstuff">
-        <TextView style="@style/Blurb" android:text="@string/please_wait" />
+        <TextView style="@style/Blurb" android:text="@string/please_wait" android:textSize="40sp" />
     </LinearLayout>
     
     <!--  SNAKE SCREEN -->
@@ -101,7 +119,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentLeft="true"
 	        android:textSize="20sp"
-	        android:text="0"/>
+	        android:text="@string/zero"/>
 	    
 	    <TextView 
 	        android:id="@+id/opponent_score_text"
@@ -110,7 +128,7 @@
 	        android:layout_height="wrap_content"
 	        android:layout_alignParentRight="true"
 	        android:textSize="20sp"
-	        android:text="0"/>
+	        android:text="@string/zero"/>
 
 	</RelativeLayout>
 	
@@ -129,7 +147,7 @@
 	        android:layout_above="@+id/low_score_text"
 	        android:layout_margin="20dp"
 	        android:textSize="40sp"
-	        android:text="0"/>
+	        android:text="@string/zero"/>
 	    
 	    <TextView 
 	        android:id="@+id/low_score_text"
@@ -139,7 +157,7 @@
 	        android:layout_above="@+id/end_message"
 	        android:layout_margin="20dp"
 	        android:textSize="40sp"
-	        android:text="0"/>
+	        android:text="@string/zero"/>
 	    
 	    <TextView 
 	        android:id="@+id/end_message"
@@ -149,7 +167,7 @@
 	        android:layout_centerVertical="true"
 	        android:layout_margin="20dp"
 	        android:textSize="46sp"
-	        android:text="0"/>
+	        android:text="@string/zero"/>
 	    
 	    <TextView
 	        android:id="@+id/chat_box"
