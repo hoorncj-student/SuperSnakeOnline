@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="mode_pause">Paused</string>
+    <string name="mode_ready">Ready</string>
+    <string name="mode_lose">You Lost! Click to start again!</string>
+    <string name="countdown">Countdown Started!</string>
+    <string name="five">5</string>
+    
     <string name="music_on">Music On</string>
     <string name="music_off">Music Off</string>
     <string name="app_name">Super Snake Online</string>
@@ -54,5 +60,6 @@
     <string name="click_me">Click me!</string>
     <string name="is_inviting_you">is challenging you to a game!</string>
     <string name="title_activity_multiplayer">MultiplayerActivity</string>
+    <string name="zero">0</string>
 
 </resources>

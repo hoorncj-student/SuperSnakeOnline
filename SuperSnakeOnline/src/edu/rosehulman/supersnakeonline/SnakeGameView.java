@@ -754,6 +754,10 @@ public class SnakeGameView extends TileView {
 		mScoreView = (TextView) scoreView;
 	}
 	
+	public void setStatusText(View statusView) {
+		mStatusText = (TextView) statusView;
+	}
+	
 	public void setOpponentScoreView(View oppScoreView){
 		if(oppScoreView == null){
 			Log.d("CRAP","setView");
