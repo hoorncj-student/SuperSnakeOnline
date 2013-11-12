@@ -33,6 +33,7 @@ public class SnakeGameView extends TileView {
     private long mPowerupDelay = 8000;
     private int level = 0;
     private int numPointsToLevel = 3;
+    private boolean isMultiplayer;
 	
     /**
      * Current direction the snake is headed.
@@ -79,6 +80,8 @@ public class SnakeGameView extends TileView {
     private long mMoveDelay = 200;
     private TextView mScoreView;
     private TextView mOppScoreView;
+    private TextView mStatusText;
+    
     /**
      * mLastMove: Tracks the absolute time when the snake last moved, and is used to determine if a
      * move should be made based on mMoveDelay.
@@ -382,7 +385,7 @@ public class SnakeGameView extends TileView {
 
         if (newMode == RUNNING && oldMode != RUNNING) {
             // hide the game instructions
-            //mStatusText.setVisibility(View.INVISIBLE);
+            mStatusText.setVisibility(View.INVISIBLE);
             update();
             // make the background and arrows visible as soon the snake starts moving
            // mArrowsView.setVisibility(View.VISIBLE);
@@ -395,22 +398,22 @@ public class SnakeGameView extends TileView {
         if (newMode == PAUSE) {
            // mArrowsView.setVisibility(View.GONE);
            // mBackgroundView.setVisibility(View.GONE);
-           // str = res.getText(R.string.mode_pause);
+           str = res.getText(R.string.mode_pause);
         }
         if (newMode == READY) {
            // mArrowsView.setVisibility(View.GONE);
            // mBackgroundView.setVisibility(View.GONE);
 
-          //  str = res.getText(R.string.mode_ready);
+          str = res.getText(R.string.mode_ready);
         }
         if (newMode == LOSE) {
           //  mArrowsView.setVisibility(View.GONE);
           //  mBackgroundView.setVisibility(View.GONE);
-          //str = res.getString(R.string.mode_lose, mScore);
+          str = res.getString(R.string.mode_lose, mScore);
         }
 
-        //mStatusText.setText(str);
-        //mStatusText.setVisibility(View.VISIBLE);
+        mStatusText.setText(str);
+        mStatusText.setVisibility(View.VISIBLE);
     }
     
     /**
